@@ -1,0 +1,1 @@
+{"username":"18667001901m@sina.cn","password":"smzdm9876","sourceUrl":"https://miaosha.jd.com/","itemLinkOrder":1,"waitBaoliao":5,"descriptionMode":0,"baoLiaoStopNumber":0,"CustomDescriptionPrefix":"京东 "}
