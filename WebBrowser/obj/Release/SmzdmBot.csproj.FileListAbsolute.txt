@@ -1,19 +1,6 @@
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\bin\Release\SmzdmBot.exe.config
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\bin\Release\SmzdmBot.exe
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\bin\Release\SmzdmBot.pdb
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\bin\Release\HtmlAgilityPack.dll
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\bin\Release\Newtonsoft.Json.dll
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\bin\Release\WebDriver.dll
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\bin\Release\WebDriver.Support.dll
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\bin\Release\HtmlAgilityPack.pdb
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\bin\Release\HtmlAgilityPack.xml
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\bin\Release\WebDriver.xml
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\bin\Release\WebDriver.Support.xml
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\obj\Release\SmzdmBot.csprojAssemblyReference.cache
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\obj\Release\SmzdmBot.csproj.CoreCompileInputs.cache
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\obj\Release\SmzdmBot.csproj.CopyComplete
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\obj\Release\SmzdmBot.exe
-C:\Users\justin\OneDrive - Microsoft\WebBrowser\WebBrowser\obj\Release\SmzdmBot.pdb
+D:\GitHub\smzdm\WebBrowser\bin\Release\SmzdmBot.exe.config
+D:\GitHub\smzdm\WebBrowser\bin\Release\SmzdmBot.exe
+D:\GitHub\smzdm\WebBrowser\bin\Release\SmzdmBot.pdb
 D:\GitHub\smzdm\WebBrowser\bin\Release\HtmlAgilityPack.dll
 D:\GitHub\smzdm\WebBrowser\bin\Release\Newtonsoft.Json.dll
 D:\GitHub\smzdm\WebBrowser\bin\Release\WebDriver.dll
@@ -25,9 +12,6 @@ D:\GitHub\smzdm\WebBrowser\bin\Release\WebDriver.xml
 D:\GitHub\smzdm\WebBrowser\bin\Release\WebDriver.Support.xml
 D:\GitHub\smzdm\WebBrowser\obj\Release\SmzdmBot.csprojAssemblyReference.cache
 D:\GitHub\smzdm\WebBrowser\obj\Release\SmzdmBot.csproj.CoreCompileInputs.cache
+D:\GitHub\smzdm\WebBrowser\obj\Release\SmzdmBot.csproj.CopyComplete
 D:\GitHub\smzdm\WebBrowser\obj\Release\SmzdmBot.exe
 D:\GitHub\smzdm\WebBrowser\obj\Release\SmzdmBot.pdb
-D:\GitHub\smzdm\WebBrowser\bin\Release\SmzdmBot.exe.config
-D:\GitHub\smzdm\WebBrowser\bin\Release\SmzdmBot.exe
-D:\GitHub\smzdm\WebBrowser\bin\Release\SmzdmBot.pdb
-D:\GitHub\smzdm\WebBrowser\obj\Release\SmzdmBot.csproj.CopyComplete

@@ -1,1 +1,0 @@
-{"username":"smzdm4122@outlook.com","password":"smzdm9988","sourceUrl":"https://search.jd.com/Search?keyword=%E7%A9%BA%E6%B0%94%E5%87%80%E5%8C%96%E5%99%A8&enc=utf-8&suggest=2.def.0.V17--12s0,20s0,38s0,97s0&wq=%E7%A9%BA%E6%B0%94&pvid=a3db37e8001e4caeb2d5d8821aae2061","itemLinkOrder":0,"waitBaoliao":5,"descriptionMode":0,"baoLiaoStopNumber":0,"CustomDescriptionPrefix":" "}
