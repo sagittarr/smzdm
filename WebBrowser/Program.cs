@@ -24,6 +24,7 @@ namespace WebBrowser
         public int baoLiaoStopNumber = 0;
         public string CustomDescriptionPrefix = "";
         public string output = "";
+        public string input = "";
         public Option()
         {
 
@@ -39,6 +40,7 @@ namespace WebBrowser
             baoLiaoStopNumber = int.Parse(args[6]);
             CustomDescriptionPrefix = args[7];
             output = args[8];
+
         }
     }
     class Program
@@ -58,7 +60,7 @@ namespace WebBrowser
                 var index = url.IndexOf(".html");
                 if (index != -1)
                 {
-                    return url.Substring(0,index) + ".html";
+                    return url.Substring(0, index) + ".html";
                 }
             }
             if ((url.StartsWith(@"https://item.jd.com/") || url.StartsWith(@"https://item.jd.hk/")) && !url.EndsWith("comment"))
@@ -87,157 +89,241 @@ namespace WebBrowser
                 }
                 return "https:" + url;
             }
+            if (url.StartsWith("https://www.xiaomiyoupin.com/detail?gid="))
+            {
+                var tokens = url.Split('&');
+                if(tokens.Length == 2)
+                {
+                    return tokens[0];
+                }
+            }
             return "";
         }
         static void Main(string[] args)
         {
             string mode = "";
-            if (args.Length == 1)
+            //if (args.Length == 1)
+            //{
+            //    Console.WriteLine("Try to read arguments from file " + args[0]);
+            //    if (File.Exists(args[0]))
+            //    {
+            //        var lines = File.ReadAllText(args[0]);
+            //        option = JsonConvert.DeserializeObject<Option>(lines);
+            //        mode = "baoliao";
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine(args[0] + " file does not exist.");
+            //        return;
+            //    }
+            //}
+            //else 
+            if(args.Length>1)
             {
-                Console.WriteLine("Try to read arguments from file " + args[0]);
-                if (File.Exists(args[0]))
+                mode = args[0];
+                if(mode == "search")
                 {
-                    var lines = File.ReadAllText(args[0]);
-                    option = JsonConvert.DeserializeObject<Option>(lines);
-                    mode = "baoliao";
+                    option.input = args[1];
                 }
-                else
+                else if(mode == "login")
                 {
-                    Console.WriteLine(args[0] + " file does not exist.");
-                    return;
+                    option.username = args[1];
+                    option.password = args[2];
+                    option.output = args[3];
                 }
-            }
-            else if(args.Length == 3)
-            {
-                option.username = args[0];
-                option.password = args[1];
-                option.output = args[2];
-                mode = "login";
-            }
-            else if(args.Length == 9)
-            {
-                option = new Option(args);
-                mode = "baoliao";
+                else if(mode == "share")
+                {
+                    option = new Option(args.Skip(1).ToArray());
+                }
             }
             else
             {
-                Console.WriteLine("Please provide argument through file.");
+                Console.WriteLine("unknown command");
                 Console.ReadKey();
                 return;
             }
             Console.WriteLine(JsonConvert.SerializeObject(option));
             Console.WriteLine("Type any key to continue");
-            Console.ReadKey();
-
-            IWebDriver driver = new FirefoxDriver();
-            try
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            if (mode == "search")
             {
-                if (mode == "baoliao")
+                if (File.Exists(option.input))
                 {
-                    var list = new List<string>();
-                    var _list = new List<string>();
-                    if (option.sourceUrl.StartsWith("http")) {
-                        list = getGoodsItemListByDriver(driver, option.sourceUrl);
-                    }
-                    else
+                    var outputPath = @"deals.txt";
+                    IWebDriver driver = new FirefoxDriver();
+                    var lines = new List<string>();
+                    foreach (var line in File.ReadAllLines(option.input))
                     {
-                        var lines = File.ReadAllLines(option.sourceUrl);
-                        _list.AddRange(lines);
-                        foreach( var url in _list)
+                        lines.Add(CheckUrl(line));
+                    }
+                    var urls = lines.Distinct().ToList();
+                    foreach (var line in urls)
+                    {
+                        var url = CheckUrl(line);
+                        if (!string.IsNullOrWhiteSpace(url))
                         {
-                            var u = CheckUrl(url);
-                            if (!string.IsNullOrWhiteSpace(u))
+                            var text = SearchDeal(driver, url);
+                            var title = driver.FindElement(By.Id("itemDisplayName")).Text;
+                            var price = ParsePrice(text, url, outputPath);
+                            price.Calculate();
+                            Console.WriteLine(JsonConvert.SerializeObject(price));
+                            //File.AppendAllText(@"D:\test.txt", JsonConvert.SerializeObject(price) + "\n");
+                            if (price.oldPrice != 0 && price.finalPrice != 0 && price.finalPrice < price.oldPrice)
                             {
-                                list.Add(u);
+                                Console.WriteLine("~~~~~~~GoodPrice " + price.oldPrice + " " + price.finalPrice);
+                                File.AppendAllText(outputPath, "\n" + url + "\n");
+                                File.AppendAllText(outputPath, title+price.oldPrice + " " + price.finalPrice +"\n");
+                                //File.AppendAllText(@"D:\test.txt", "~~~~~~~GoodPrice " + price.oldPrice + " " + price.finalPrice + "\n");
+                            }
+                            else if (price.retainage > 0 && price.deposit > 0 && price.finalPrice<price.oldPrice)
+                            {
+                                Console.WriteLine("~~~~~~~GoodPrice " + price.finalPrice);
+                                File.AppendAllText(outputPath, "\n"+ url + "\n");
+                                File.AppendAllText(outputPath, title+  price.finalPrice + "\n");
+                                //File.AppendAllText(@"D:\test.txt", "~~~~~~~GoodPrice " + price.finalPrice + "\n");
                             }
                         }
                     }
-                    list = list.Distinct().ToList().Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-                    foreach (var item in list)
-                    {
-                        Console.WriteLine(item);
-                    }
-                    if (option.itemLinkOrder == 1)
-                    {
-                        list.Reverse();
-                    }
-                    Console.WriteLine("Total item count " + list.Count);
-                    Console.WriteLine("Type any key to continue");
-                    Console.ReadKey();
-
-                    if (!Login(driver))
-                    {
-                        return;
-                    }
-                    int i = 0;
-                    while (i < list.Count)
-                    {
-                        var code = 0;
-                        while (0 == code && i < list.Count)
-                        {
-                            code = PasteItemUrl(driver, list[i], i, option.waitBaoliao, option.baoLiaoStopNumber);
-                            i++;
-                        }
-                        if (code == 2) break;
-                        SubmitBaoLiao(driver, option.descriptionMode);
-                    }
-                    Console.WriteLine("Finished.");
-                }
-                else if (mode == "login")
-                {
-                    if (!Login(driver))
-                    {
-                        return;
-                    }
-                    ReadInfo(driver);
                 }
                 else
                 {
-                    Console.WriteLine("unknown mode " + mode);
-
-                    return;
+                    Console.WriteLine(args[0] + " file does not exist.");
                 }
-            }
-            catch(Exception e)
-            {
-                if (File.Exists(option.output))
-                {
-                    File.AppendAllText(option.output, "username:" + option.username + "," + "error message:" + e.Message.Replace(","," ") + "\n");
-                    Console.WriteLine(e.Message);
-                }
-                else
-                {
-                    Console.WriteLine(option.output + " file does not exist.");
-                    return;
-                }
+                Console.WriteLine("Finished Deal Search.");
                 return;
             }
-
-            OutputStatus(driver);
-            if (gold > 1)
+            else if (mode == "share")
             {
-                Console.WriteLine(option.username + " gold=" + gold);
+                IWebDriver driver = new FirefoxDriver();
+                var list = new List<string>();
+                var _list = new List<string>();
+                if (option.sourceUrl.StartsWith("http"))
+                {
+                    list = getGoodsItemListByDriver(driver, option.sourceUrl);
+                }
+                else
+                {
+                    var lines = File.ReadAllLines(option.sourceUrl);
+                    _list.AddRange(lines);
+                    foreach (var url in _list)
+                    {
+                        var u = CheckUrl(url);
+                        if (!string.IsNullOrWhiteSpace(u))
+                        {
+                            list.Add(u);
+                        }
+                    }
+                }
+                list = list.Distinct().ToList().Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+                foreach (var item in list)
+                {
+                    Console.WriteLine(item);
+                }
+                if (option.itemLinkOrder == 1)
+                {
+                    list.Reverse();
+                }
+                Console.WriteLine("Total item count " + list.Count);
+                Console.WriteLine("Type any key to continue");
+
+                if (!Login(driver))
+                {
+                    return;
+                }
+                int i = 0;
+                while (i < list.Count)
+                {
+                    var code = 0;
+                    while (0 == code && i < list.Count)
+                    {
+                        code = PasteItemUrl(driver, list[i], i, option.waitBaoliao, option.baoLiaoStopNumber);
+                        i++;
+                    }
+                    if (code == 2) break;
+                    SubmitBaoLiao(driver, option.descriptionMode);
+                }
+                Console.WriteLine("Finished.");
+                OutputStatus(driver);
+                if (gold > 1)
+                {
+                    Console.WriteLine(option.username + " gold=" + gold);
+                }
+                else
+                {
+                    driver.Close();
+                }
+            }
+            else if (mode == "login")
+            {
+                IWebDriver driver = new FirefoxDriver();
+                if (!Login(driver))
+                {
+                    return;
+                }
+                ReadInfo(driver);
+                OutputStatus(driver);
+                if (gold > 1)
+                {
+                    Console.WriteLine(option.username + " gold=" + gold);
+                }
+                else
+                {
+                    driver.Close();
+                }
             }
             else
             {
-                driver.Close();
+                Console.WriteLine("unknown mode " + mode);
+
+                return;
             }
+            //}
+            //catch(Exception e)
+            //{
+            //    if (File.Exists(option.output))
+            //    {
+            //        File.AppendAllText(option.output, "username:" + option.username + "," + "error message:" + e.Message.Replace(","," ") + "\n");
+            //        Console.WriteLine(e.Message);
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine(option.output + " file does not exist.");
+            //        return;
+            //    }
+            //    return;
+            //}
+
+
             return;
+        }
+
+        public static string SearchDeal(IWebDriver driver, string url)
+        {
+            driver.Navigate().GoToUrl(url);
+            return driver.FindElement(By.Id("priceDom")).Text;
+        }
+        public static Price ParsePrice(string text, string source, string output)
+        {
+            if (source.Contains("suning.com"))
+            {
+                return SUNINGPriceParser.Parse(text, source, output);
+            }
+            return null;
         }
         public static void OutputStatus(IWebDriver driver)
         {
             var status = getStatus(driver);
             Console.WriteLine(status);
             var output = option.output;
-            
+
             var arr = status.Replace("\r", "").Split('\n');
-            for (int i= 0; i<arr.Length; i++)
+            for (int i = 0; i < arr.Length; i++)
             {
                 //Console.WriteLine(a);
-                
-                if (arr[i].Contains("金币") && i>0)
+
+                if (arr[i].Contains("金币") && i > 0)
                 {
-                    var num = new string(arr[i-1].Where(x => Char.IsDigit(x)).ToArray());
+                    var num = new string(arr[i - 1].Where(x => Char.IsDigit(x)).ToArray());
                     Console.WriteLine("gold " + num);
                     if (!string.IsNullOrWhiteSpace(num))
                     {
@@ -247,7 +333,7 @@ namespace WebBrowser
             }
             if (File.Exists(output))
             {
-                File.AppendAllText(output, "username:"+option.username + ","  + "nickName:" + nickName+ ",level:"+ Level + ",gold:" + gold + ",left:" + BaoLiaoLeft + ",loginTime:" + DateTime.Now +",status:"+ status.Replace("\r", "").Replace("\n", "") +"\n");
+                File.AppendAllText(output, "username:" + option.username + "," + "nickName:" + nickName + ",level:" + Level + ",gold:" + gold + ",left:" + BaoLiaoLeft + ",loginTime:" + DateTime.Now + ",status:" + status.Replace("\r", "").Replace("\n", "") + "\n");
             }
             else
             {
@@ -291,15 +377,15 @@ namespace WebBrowser
 
                     if (despMode == 1)
                     {
-                        desp.SendKeys("京东秒杀价" + " 只要" + price + "!");
+                        desp.SendKeys("预计到手价" + price + "!");
                     }
                     else if (despMode == 0)
                     {
-                        desp.SendKeys(name + " 只要" + price + "!");
+                        desp.SendKeys(name + " 预计到手价" + price + "!");
                     }
                     else
                     {
-                        desp.SendKeys(option.CustomDescriptionPrefix + " 只要" + price + "!");
+                        desp.SendKeys(option.CustomDescriptionPrefix + " 预计到手价" + price + "!");
                     }
 
                 }
@@ -308,6 +394,7 @@ namespace WebBrowser
                 //driver.FindElement(By.Id("un-feedback-submit")).Submit();
                 try
                 {
+                    
                     driver.FindElement(By.Id("un-feedback-submit")).Click();
                 }
                 catch (Exception)
@@ -377,7 +464,7 @@ namespace WebBrowser
             }
             return false;
         }
-        
+
         private static int ReadInfo(IWebDriver driver)
         {
             var notice = driver.FindElement(By.Id("bhNotice")).Text;
@@ -454,7 +541,7 @@ namespace WebBrowser
             return driver.FindElement(By.ClassName("info-stuff-assets")).Text;
         }
 
-        private static List<string> getGoodsItemListByDriver(IWebDriver driver, string url, int retry=10)
+        private static List<string> getGoodsItemListByDriver(IWebDriver driver, string url, int retry = 10)
         {
             driver.Navigate().GoToUrl(url);
             var res = new List<string>();

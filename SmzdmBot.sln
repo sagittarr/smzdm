@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebBrowser", "WebBrowser\WebBrowser.csproj", "{582F73B0-0ED4-4A44-A9F8-C2900B89CE06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmzdmBot", "WebBrowser\SmzdmBot.csproj", "{582F73B0-0ED4-4A44-A9F8-C2900B89CE06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

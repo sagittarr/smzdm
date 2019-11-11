@@ -50,10 +50,10 @@ else :
         else:
             username = str(int(row['phone']))
         if sourceUrl!= "nan":
-            if command == "submit":
-                cmd = ["./SmzdmBot.exe", username, password, sourceUrl,'0','5','0','0','好价',outputPth]
+            if command == "share":
+                cmd = ["./SmzdmBot.exe", command,username, password, sourceUrl,'0','5','0','0','好价',outputPth]
             elif command == "login":
-                cmd = ["./SmzdmBot.exe", username ,password, outputPth]
+                cmd = ["./SmzdmBot.exe", command,username ,password, outputPth]
             else: 
                 sys.exit()
             print(cmd)

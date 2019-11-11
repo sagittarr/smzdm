@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{582F73B0-0ED4-4A44-A9F8-C2900B89CE06}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>WebBrowser</RootNamespace>
+    <RootNamespace>SmzdmBot</RootNamespace>
     <AssemblyName>SmzdmBot</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -79,8 +79,10 @@
   <ItemGroup>
     <Compile Include="CsvHelper.cs" />
     <Compile Include="PhoneFinder.cs" />
+    <Compile Include="Price.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SUNINGPriceParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
