@@ -63,15 +63,15 @@ namespace WebBrowser
                     return url.Substring(0, index) + ".html";
                 }
             }
-            if ((url.StartsWith(@"https://item.jd.com/") || url.StartsWith(@"https://item.jd.hk/")) && !url.EndsWith("comment"))
+            else if ((url.StartsWith(@"https://item.jd.com/") || url.StartsWith(@"https://item.jd.hk/")) && !url.EndsWith("comment"))
             {
                 return url;
             }
-            if ((url.StartsWith(@"//item.jd.com/") || url.StartsWith(@"//item.jd.hk/")) && !url.EndsWith("comment"))
+            else if ((url.StartsWith(@"//item.jd.com/") || url.StartsWith(@"//item.jd.hk/")) && !url.EndsWith("comment"))
             {
                 return url.Replace("//", "");
             }
-            if (url.StartsWith("https://goods.kaola.com/product/"))
+            else if (url.StartsWith("https://goods.kaola.com/product/"))
             {
                 var index = url.IndexOf(".html");
                 if (index != -1)
@@ -80,7 +80,7 @@ namespace WebBrowser
                 }
                 return url;
             }
-            if (url.StartsWith("//goods.kaola.com/product/"))
+            else if (url.StartsWith("//goods.kaola.com/product/"))
             {
                 var index = url.IndexOf(".html");
                 if (index != -1)
@@ -89,12 +89,32 @@ namespace WebBrowser
                 }
                 return "https:" + url;
             }
-            if (url.StartsWith("https://www.xiaomiyoupin.com/detail?gid="))
+            else if (url.StartsWith("https://www.xiaomiyoupin.com/detail?gid="))
             {
                 var tokens = url.Split('&');
                 if(tokens.Length == 2)
                 {
                     return tokens[0];
+                }
+            }
+            else if (url.StartsWith("https://world.tmall.com/item/"))
+            {
+                var tokens = url.Split('?');
+                if (tokens.Length == 2)
+                {
+                    return tokens[0];
+                }
+            }
+            else if (url.StartsWith("https://detail.tmall.com/item.htm?"))
+            {
+                url = url.Substring("https://detail.tmall.com/item.htm?".Length);
+                var tokens = url.Split('&');
+                foreach(var t in tokens)
+                {
+                    if (t.StartsWith("id="))
+                    {
+                        return "https://detail.tmall.com/item.htm?" + t;
+                    }
                 }
             }
             return "";
@@ -149,7 +169,7 @@ namespace WebBrowser
             {
                 if (File.Exists(option.input))
                 {
-                    var outputPath = @"deals.txt";
+                    var outputPath = @"../../data/deals.txt";
                     IWebDriver driver = new FirefoxDriver();
                     var lines = new List<string>();
                     foreach (var line in File.ReadAllLines(option.input))

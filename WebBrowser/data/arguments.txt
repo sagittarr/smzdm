@@ -1,0 +1,2 @@
+16558785249 smzdm0123    https://mall.jd.hk/index-120390.html   0          7             2               0                    海外好货！值得买
+#username       #password #source url        #order     #wait time    #desp mode      #baoliao stop number   #custom prefix
