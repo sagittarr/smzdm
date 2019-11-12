@@ -79,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CsvHelper.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="PhoneFinder.cs" />
     <Compile Include="Price.cs" />
     <Compile Include="Program.cs" />
