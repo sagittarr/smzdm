@@ -169,7 +169,7 @@ namespace WebBrowser
             {
                 if (File.Exists(option.input))
                 {
-                    var outputPath = @"../../data/deals.txt";
+                    var outputPath = @"../smzdm/data/deals.txt";
                     IWebDriver driver = new FirefoxDriver();
                     var lines = new List<string>();
                     foreach (var line in File.ReadAllLines(option.input))

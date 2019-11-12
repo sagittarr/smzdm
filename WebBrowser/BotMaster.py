@@ -41,6 +41,8 @@ else :
         comment = row['comment']
         sourceUrl = row['sourceUrl']
         login = row['login']
+        if type(sourceUrl) == type("") and sourceUrl.endswith('.txt'):
+            sourceUrl = 'data/' + sourceUrl
         if login!='y':
             continue
         username = ''
@@ -51,9 +53,9 @@ else :
             username = str(int(row['phone']))
         if sourceUrl!= "nan":
             if command == "share":
-                cmd = ["./bin/Release/SmzdmBot.exe", command,username, password, sourceUrl,'0','5','0','0','好价',outputPth]
+                cmd = ["../../smzdm_build/SmzdmBot.exe", command,username, password, sourceUrl,'0','5','0','0','好价',outputPth]
             elif command == "login":
-                cmd = ["./bin/Release/SmzdmBot.exe", command,username ,password, outputPth]
+                cmd = ["../../smzdm_build/SmzdmBot.exe", command,username ,password, outputPth]
             else: 
                 sys.exit()
             print(cmd)
