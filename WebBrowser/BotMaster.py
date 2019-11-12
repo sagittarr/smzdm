@@ -31,10 +31,9 @@ if command == "read":
         dfObj = dfObj.append(kv[1], ignore_index=True)
     print(dfObj)
     dfObj.to_csv(outputPth,encoding='utf-8')              
-    #with open(outputPth,'w',encoding="utf8") as myFile:
-    #    for kv in dict.items():
-    #        print(kv[1])
-    #        myFile.write(kv[1])
+elif command == "search":
+    cmd = ["../../smzdm_build/SmzdmBot.exe","search",inputPth,outputPth]
+    subprocess.Popen(cmd,creationflags=CREATE_NEW_CONSOLE)
 else :
     table=pd.read_csv(inputPth)
     for index, row in table.iterrows():
@@ -53,7 +52,7 @@ else :
             username = str(int(row['phone']))
         if sourceUrl!= "nan":
             if command == "share":
-                cmd = ["../../smzdm_build/SmzdmBot.exe", command,username, password, sourceUrl,'0','5','0','0','好价',outputPth]
+                cmd = ["../../smzdm_build/SmzdmBot.exe", command,username, password, sourceUrl,'2','5','0','0','好价',outputPth]
             elif command == "login":
                 cmd = ["../../smzdm_build/SmzdmBot.exe", command,username ,password, outputPth]
             else: 

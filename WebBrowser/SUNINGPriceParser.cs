@@ -30,12 +30,13 @@ namespace WebBrowser
         {
             text = text.Replace("\r", "");
             Console.WriteLine(url);
+            
             //File.AppendAllText(outputPath, url + "\n");
             Console.WriteLine(text);
             //File.AppendAllLines(outputPath, text.Split('\n'));
             var textLine = text.Split('\n');
             var price = new Price();
-            price.source = url;
+            price.sourceUrl = url;
             var whatToRead = "";
             foreach (var line in textLine)
             {

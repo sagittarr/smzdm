@@ -12,7 +12,7 @@ namespace WebBrowser
         public double oldPrice { get; set; }
         public double currentPrice { get; set; }
         public List<List<double>> coupons { get; set; }
-        public string source;
+        public string sourceUrl { get; set; }
         public double deposit { get; set; }
         public double retainage { get; set; }
 
@@ -60,7 +60,7 @@ namespace WebBrowser
         }
         public void Calculate()
         {
-            if (source.Contains("suning.com"))
+            if (sourceUrl.Contains("suning.com"))
             {
                 if(currentPrice>0)
                 {

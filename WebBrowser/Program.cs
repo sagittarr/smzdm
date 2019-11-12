@@ -4,6 +4,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
+using SmzdmBot;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -144,6 +145,7 @@ namespace WebBrowser
                 if(mode == "search")
                 {
                     option.input = args[1];
+                    option.output = args[2];
                 }
                 else if(mode == "login")
                 {
@@ -169,7 +171,7 @@ namespace WebBrowser
             {
                 if (File.Exists(option.input))
                 {
-                    var outputPath = @"../smzdm/data/deals.txt";
+                    var outputPath = option.output;
                     IWebDriver driver = new FirefoxDriver();
                     var lines = new List<string>();
                     foreach (var line in File.ReadAllLines(option.input))
@@ -190,15 +192,17 @@ namespace WebBrowser
                             //File.AppendAllText(@"D:\test.txt", JsonConvert.SerializeObject(price) + "\n");
                             if (price.oldPrice != 0 && price.finalPrice != 0 && price.finalPrice < price.oldPrice)
                             {
-                                Console.WriteLine("~~~~~~~GoodPrice " + price.oldPrice + " " + price.finalPrice);
+                                Console.WriteLine("~~~~~~~Found good price " + price.oldPrice + " " + price.finalPrice);
                                 File.AppendAllText(outputPath, "\n" + url + "\n");
+                                //File.AppendAllText(outputPath, JsonConvert.SerializeObject(price) + "\n");
                                 File.AppendAllText(outputPath, title+price.oldPrice + " " + price.finalPrice +"\n");
                                 //File.AppendAllText(@"D:\test.txt", "~~~~~~~GoodPrice " + price.oldPrice + " " + price.finalPrice + "\n");
                             }
                             else if (price.retainage > 0 && price.deposit > 0 && price.finalPrice<price.oldPrice)
                             {
-                                Console.WriteLine("~~~~~~~GoodPrice " + price.finalPrice);
+                                Console.WriteLine("~~~~~~~Found good price " + price.finalPrice);
                                 File.AppendAllText(outputPath, "\n"+ url + "\n");
+                                //File.AppendAllText(outputPath, JsonConvert.SerializeObject(price) + "\n");
                                 File.AppendAllText(outputPath, title+  price.finalPrice + "\n");
                                 //File.AppendAllText(@"D:\test.txt", "~~~~~~~GoodPrice " + price.finalPrice + "\n");
                             }
@@ -225,9 +229,19 @@ namespace WebBrowser
                 {
                     var lines = File.ReadAllLines(option.sourceUrl);
                     _list.AddRange(lines);
-                    foreach (var url in _list)
+                    var priceList = new List<Price>();
+                    foreach (var line in _list)
                     {
-                        var u = CheckUrl(url);
+                        if (line.StartsWith("{\""))
+                        {
+                            var p = JsonConvert.DeserializeObject<Price>(line);
+                            if (p != null)
+                            {
+                                priceList.Add(p);
+                            }
+                        }
+                        var u = CheckUrl(line);
+
                         if (!string.IsNullOrWhiteSpace(u))
                         {
                             list.Add(u);
@@ -235,16 +249,21 @@ namespace WebBrowser
                     }
                 }
                 list = list.Distinct().ToList().Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-                foreach (var item in list)
-                {
-                    Console.WriteLine(item);
-                }
+                
+
                 if (option.itemLinkOrder == 1)
                 {
                     list.Reverse();
                 }
+                if (option.itemLinkOrder == 2)
+                {
+                    list = Helper.ShuffleList<string>(list);
+                }
+                foreach (var item in list)
+                {
+                    Console.WriteLine(item);
+                }
                 Console.WriteLine("Total item count " + list.Count);
-                Console.WriteLine("Type any key to continue");
 
                 if (!Login(driver))
                 {
@@ -649,5 +668,7 @@ namespace WebBrowser
             }
             return list.Distinct().ToList();
         }
+
+
     }
 }
