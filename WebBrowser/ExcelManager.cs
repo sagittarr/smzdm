@@ -1,29 +1,64 @@
-﻿using Microsoft.Office.Interop.Excel;
+﻿
+using Newtonsoft.Json;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Excel = Microsoft.Office.Interop.Excel;
 namespace SmzdmBot
 {
     public class ExcelManager
     {
-        public void Load(string filePath)
+
+        //public static void Save(DataTable dataTable, string path)
+        //{
+        //    using (ExcelPackage pck = new ExcelPackage(new File(path)))
+        //    {
+        //        ExcelWorksheet ws = pck.Workbook.Worksheets.Add("Account");
+        //        ws.Cells["A1"].LoadFromDataTable(dataTable, true);
+        //        pck.Save();
+        //    }
+        //}
+        public static void Load(string path)
         {
-            var MyApp = new Excel.Application();
-            MyApp.Visible = false;
-            var MyBook = MyApp.Workbooks.Open(@"D:\GitHub\smzdm\WebBrowser\data\smzdm_status.csv");
-            var MySheet = (Excel.Worksheet)MyBook.Sheets[1]; // Explicit cast is not required here
-            for (int row = 1; row < MySheet.UsedRange.Rows.Count; row++) // Count is 1048576 instead of 4
+            DataTable dataTable = GetDataTableFromExcel(path);
+            Console.WriteLine(dataTable.Rows[1]["nickname"].ToString());
+            var account = new Account(dataTable.Rows[1]["phone"].ToString(), dataTable.Rows[1]["password"].ToString(), dataTable.Rows[1]["email"].ToString());
+            account.login = dataTable.Rows[1]["login"].ToString();
+            Console.WriteLine(JsonConvert.SerializeObject(account));
+        }
+
+        public static DataTable GetDataTableFromExcel(string path, bool hasHeader = true)
+        {
+            using (var pck = new OfficeOpenXml.ExcelPackage())
             {
-                for (int col = 1; col < MySheet.UsedRange.Columns.Count; col++) // Count is 16384 instead of 4
+                using (var stream = File.OpenRead(path))
                 {
-                    var dataRange = (Range)MySheet.UsedRange.Cells[row, col];
-                    Console.Write(String.Format(dataRange.Value2.ToString() + " "));
+                    pck.Load(stream);
                 }
-                Console.WriteLine();
+                var ws = pck.Workbook.Worksheets.First();
+                DataTable tbl = new DataTable();
+                foreach (var firstRowCell in ws.Cells[1, 1, 1, ws.Dimension.End.Column])
+                {
+                    tbl.Columns.Add(hasHeader ? firstRowCell.Text : string.Format("Column {0}", firstRowCell.Start.Column));
+                }
+                var startRow = hasHeader ? 2 : 1;
+                for (int rowNum = startRow; rowNum <= ws.Dimension.End.Row; rowNum++)
+                {
+                    var wsRow = ws.Cells[rowNum, 1, rowNum, ws.Dimension.End.Column];
+                    DataRow row = tbl.Rows.Add();
+                    foreach (var cell in wsRow)
+                    {
+                        row[cell.Start.Column - 1] = cell.Text;
+                    }
+                }
+                return tbl;
             }
         }
+
     }
+
 }

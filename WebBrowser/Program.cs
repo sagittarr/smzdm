@@ -12,7 +12,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-namespace WebBrowser
+
+namespace SmzdmBot
 {
     public class Option
     {
@@ -52,6 +53,7 @@ namespace WebBrowser
         public static string nickName = "";
         public static int gold = -1;
         public static Option option = new Option();
+
 
         //public static string CustomPrefix = "";
         static string CheckUrl(string url)
@@ -123,23 +125,9 @@ namespace WebBrowser
         static void Main(string[] args)
         {
             string mode = "";
-            //if (args.Length == 1)
-            //{
-            //    Console.WriteLine("Try to read arguments from file " + args[0]);
-            //    if (File.Exists(args[0]))
-            //    {
-            //        var lines = File.ReadAllText(args[0]);
-            //        option = JsonConvert.DeserializeObject<Option>(lines);
-            //        mode = "baoliao";
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine(args[0] + " file does not exist.");
-            //        return;
-            //    }
-            //}
-            //else 
-            if(args.Length>1)
+            ExcelManager.Load(@"D:\GitHub\smzdm\WebBrowser\data\smzdm.xlsx");
+            Console.ReadKey();
+            if (args.Length>1)
             {
                 mode = args[0];
                 if(mode == "search")
@@ -182,9 +170,11 @@ namespace WebBrowser
                     foreach (var line in urls)
                     {
                         var url = CheckUrl(line);
-                        if (!string.IsNullOrWhiteSpace(url))
+                        if (string.IsNullOrWhiteSpace(url)) continue;
+                        if ( url.StartsWith("https://product.suning.com/"))
                         {
-                            var text = SearchDeal(driver, url);
+                            driver.Navigate().GoToUrl(url);
+                            var text = driver.FindElement(By.Id("priceDom")).Text;
                             var title = driver.FindElement(By.Id("itemDisplayName")).Text;
                             var price = ParsePrice(text, url, outputPath);
                             price.Calculate();
@@ -206,6 +196,13 @@ namespace WebBrowser
                                 File.AppendAllText(outputPath, title+  price.finalPrice + "\n");
                                 //File.AppendAllText(@"D:\test.txt", "~~~~~~~GoodPrice " + price.finalPrice + "\n");
                             }
+                        }
+                        else if (url.StartsWith("https://item.jd.com/"))
+                        {
+                            driver.Navigate().GoToUrl(url);
+                            var text = driver.FindElement(By.ClassName("summary-price-wrap")).Text;
+                            var title = driver.FindElement(By.ClassName("sku-name")).Text;
+                            var price = ParsePrice(text, url, outputPath);
                         }
                     }
                 }
@@ -316,22 +313,6 @@ namespace WebBrowser
 
                 return;
             }
-            //}
-            //catch(Exception e)
-            //{
-            //    if (File.Exists(option.output))
-            //    {
-            //        File.AppendAllText(option.output, "username:" + option.username + "," + "error message:" + e.Message.Replace(","," ") + "\n");
-            //        Console.WriteLine(e.Message);
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine(option.output + " file does not exist.");
-            //        return;
-            //    }
-            //    return;
-            //}
-
 
             return;
         }
@@ -346,6 +327,10 @@ namespace WebBrowser
             if (source.Contains("suning.com"))
             {
                 return SUNINGPriceParser.Parse(text, source, output);
+            }
+            else if (source.Contains("item.jd.com"))
+            {
+                return JDPriceParser.Parse(text, source, output);
             }
             return null;
         }
