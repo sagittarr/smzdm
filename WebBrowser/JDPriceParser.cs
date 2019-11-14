@@ -26,14 +26,13 @@ namespace SmzdmBot
         //        //File.AppendAllText(@"D:\test.txt", "~~~~~~~GoodPrice " + price.finalPrice + "\n");
         //    }
         //}
-        public static Price Parse(string text, string url, string outputPath)
+        public static Price Parse(string text, string url)
         {
             text = text.Replace("\r", "");
             Console.WriteLine(url);
             
             //File.AppendAllText(outputPath, url + "\n");
             Console.WriteLine(text);
-            File.AppendAllLines(outputPath, text.Split('\n'));
             var textLine = text.Split('\n');
             var price = new Price();
             price.sourceUrl = url;

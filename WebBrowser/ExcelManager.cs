@@ -22,13 +22,20 @@ namespace SmzdmBot
         //        pck.Save();
         //    }
         //}
-        public static void Load(string path)
+        public static List<Account> Load(string path)
         {
             DataTable dataTable = GetDataTableFromExcel(path);
-            Console.WriteLine(dataTable.Rows[1]["nickname"].ToString());
-            var account = new Account(dataTable.Rows[1]["phone"].ToString(), dataTable.Rows[1]["password"].ToString(), dataTable.Rows[1]["email"].ToString());
-            account.login = dataTable.Rows[1]["login"].ToString();
-            Console.WriteLine(JsonConvert.SerializeObject(account));
+            var accounts = new List<Account>();
+            foreach(DataRow row in dataTable.Rows)
+            {
+                if(row["login"].ToString().ToLower() == "y")
+                {
+                    var account = new Account(dataTable.Rows[1]["phone"].ToString(), dataTable.Rows[1]["password"].ToString(), dataTable.Rows[1]["email"].ToString());
+                    accounts.Add(account);
+                }
+            }
+            
+            return accounts;
         }
 
         public static DataTable GetDataTableFromExcel(string path, bool hasHeader = true)

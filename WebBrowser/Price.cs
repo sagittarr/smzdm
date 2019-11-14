@@ -17,6 +17,9 @@ namespace SmzdmBot
         public double retainage { get; set; }
 
         public double finalPrice { get; set; }
+        public string storeName { get; set; }
+
+        public string ItemName { get; set; }
         public Price()
         {
             coupons = new List<List<double>>();
@@ -60,8 +63,8 @@ namespace SmzdmBot
         }
         public void Calculate()
         {
-            if (sourceUrl.Contains("suning.com"))
-            {
+            //if (sourceUrl.Contains("suning.com"))
+            //{
                 if(currentPrice>0)
                 {
                     var newPrice = ApplyCoupon(coupons, currentPrice);
@@ -75,7 +78,7 @@ namespace SmzdmBot
                     if (newPrice == 0) newPrice = price;
                     finalPrice = newPrice < deposit+ retainage ? newPrice : deposit + retainage;
                 }
-            }
+            //}
         }
     }
 }

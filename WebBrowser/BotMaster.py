@@ -31,8 +31,8 @@ if command == "read":
         dfObj = dfObj.append(kv[1], ignore_index=True)
     print(dfObj)
     dfObj.to_csv(outputPth,encoding='utf-8')              
-elif command == "search":
-    cmd = ["../../smzdm_build/SmzdmBot.exe","search",inputPth,outputPth]
+elif command == "search" or command == "crawl":
+    cmd = ["../../smzdm_build/SmzdmBot.exe",command,inputPth,outputPth]
     subprocess.Popen(cmd,creationflags=CREATE_NEW_CONSOLE)
 else :
     table=pd.read_csv(inputPth)

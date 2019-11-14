@@ -13,20 +13,18 @@ namespace SmzdmBot
         {
             return new string(input.Where(x => x == '.' || Char.IsDigit(x)).ToArray());
         }
-        //public static string  GenerateDescription(Price price, string url){
-        //    if (price.oldPrice != 0 && price.finalPrice != 0 && price.finalPrice < price.oldPrice)
-        //    {
-        //        Console.WriteLine("~~~~~~~GoodPrice " + price.oldPrice + " " + price.finalPrice);
-        //        return "原价" + (int)price.oldPrice + "元，预计到手价" + (int)price.finalPrice + "元";
-        //        //File.AppendAllText(@"D:\test.txt", "~~~~~~~GoodPrice " + price.oldPrice + " " + price.finalPrice + "\n");
-        //    }
-        //    else if (price.retainage > 0 && price.deposit > 0)
-        //    {
-        //        Console.WriteLine("~~~~~~~GoodPrice " + price.finalPrice);
-        //        //File.AppendAllText(@"D:\test.txt", "~~~~~~~GoodPrice " + price.finalPrice + "\n");
-        //    }
-        //}
-        public static Price Parse(string text, string url, string outputPath)
+        public static string ParseShopName(string text)
+        {
+            text = text.Replace("\r", "").Replace(" ","");
+            List<string> lines = text.Split('\n').ToList();
+            var loc = lines.IndexOf("商家：");
+            if(loc!=-1 && loc+1 < lines.Count)
+            {
+                return lines[loc + 1];
+            }
+            return "";
+        }
+        public static Price Parse(string text, string url)
         {
             text = text.Replace("\r", "");
             Console.WriteLine(url);
