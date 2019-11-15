@@ -219,6 +219,7 @@ namespace SmzdmBot
         //2=stop and quit
         public int PasteItemUrl(string url, int index, int timeWait, int stopNumber)
         {
+            if (baoLiaoLeft == 0) return 2;
             if (baoLiaoLeft != -1 && startNumber - baoLiaoLeft >= stopNumber) return 2;
             driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
             Console.WriteLine("Pasting " + index + " " + url);
@@ -236,6 +237,7 @@ namespace SmzdmBot
                 Thread.Sleep(timeWait * 1000);
                 //var pop2 = driver.FindElement(By.Id("pop2"));
                 int left = ReadInfo();
+                if (baoLiaoLeft == 0) return 2;
                 if (left != -1 && startNumber - baoLiaoLeft >= stopNumber)
                 {
                     Console.WriteLine("Quit loop");

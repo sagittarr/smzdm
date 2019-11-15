@@ -60,7 +60,7 @@ namespace SmzdmBot
         public static string CheckUrl(string url)
         {
             if (url == null) return "";
-            if (url.StartsWith("https://product.suning.com/"))
+            if (url.StartsWith("https://product.suning.com/") || url.StartsWith("http://product.suning.com/"))
             {
                 var index = url.IndexOf(".html");
                 if (index != -1)

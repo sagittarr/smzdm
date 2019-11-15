@@ -52,7 +52,7 @@ else :
             username = str(int(row['phone']))
         if sourceUrl!= "nan":
             if command == "share":
-                cmd = ["../../smzdm_build/SmzdmBot.exe", command,username, password, sourceUrl,'2','5','0','2','好价',outputPth]
+                cmd = ["../../smzdm_build/SmzdmBot.exe", command,username, password, sourceUrl,'2','5','0','10','好价',outputPth]
             elif command == "login":
                 cmd = ["../../smzdm_build/SmzdmBot.exe", command,username ,password, outputPth]
             else: 

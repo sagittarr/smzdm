@@ -63,6 +63,7 @@ namespace SmzdmBot
         }
         public void SearchAll(List<string> urlList, string outputPath)
         {
+            Console.WriteLine("input link count " +urlList.Count);
             foreach (var line in urlList)
             {
                 var url = Helper.CheckUrl(line);
@@ -94,7 +95,7 @@ namespace SmzdmBot
         {
             //var url = Helper.CheckUrl(link);
             if (string.IsNullOrWhiteSpace(url)) return null;
-            if (url.StartsWith("https://product.suning.com/"))
+            if (url.Contains("product.suning.com"))
             {
                 driver.Navigate().GoToUrl(url);
                 var priceText = driver.FindElement(By.Id("priceDom")).Text;
