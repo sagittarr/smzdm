@@ -52,6 +52,7 @@ namespace SmzdmBot
                     File.AppendAllText(outputPath, price.sourceUrl + "\n");
                 }
                 var newLinks = GetNewLinks();
+                if (newLinks == null) continue;
                 newLinks = newLinks.Except(visited).ToList();
                 foreach(var link in newLinks)
                 {
@@ -136,9 +137,23 @@ namespace SmzdmBot
                     Console.ReadKey();
                     login = true;
                 }
-                var priceText = driver.FindElement(By.ClassName("tm-fcs-panel")).Text;
-                var title = driver.FindElement(By.ClassName("tb-detail-hd")).FindElement(By.TagName("h1")).Text;
-                var storeName = driver.FindElement(By.ClassName("shopLink")).Text;
+                var priceText = "";
+                var title = "";
+                var storeName = "";
+                try
+                {
+                    priceText = driver.FindElement(By.ClassName("tm-fcs-panel")).Text;
+                    title = driver.FindElement(By.ClassName("tb-detail-hd")).FindElement(By.TagName("h1")).Text;
+                    storeName = driver.FindElement(By.ClassName("shopLink")).Text;
+                }
+                catch(NoSuchElementException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                if (String.IsNullOrWhiteSpace(priceText))
+                {
+                    return null;
+                }   
                 var price = ParsePrice(priceText, url);
                 price.sourceUrl = url;
                 price.storeName = storeName;
@@ -155,9 +170,17 @@ namespace SmzdmBot
 
         public List<string> GetNewLinks()
         {
-           var elements =  driver.FindElements(By.TagName("a")).ToList();
-           List<string> links = elements.Select(x=> Helper.CheckUrl(x.GetAttribute("href"))).ToList();
-           return links.Where(x => !String.IsNullOrWhiteSpace(x)).Distinct().ToList();
+            try
+            {
+                var elements = driver.FindElements(By.TagName("a")).ToList();
+                List<string> links = elements.Select(x => Helper.CheckUrl(x.GetAttribute("href"))).ToList();
+                return links.Where(x => !String.IsNullOrWhiteSpace(x)).Distinct().ToList();
+            }
+            catch(NoSuchElementException e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
         }
         private void Print(string text)
         {
