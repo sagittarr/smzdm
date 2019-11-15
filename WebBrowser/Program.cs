@@ -61,6 +61,16 @@ namespace SmzdmBot
                     option.input = args[1];
                     option.output = args[2];
                 }
+                else if(mode == "crawl")
+                {
+                    option.input = args[1];
+                    option.output = args[2];
+                    if (args.Length >= 4)
+                    {
+                        option.CrawlCount = int.Parse(args[3]);
+                    }
+                    
+                }
                 else if(mode == "login")
                 {
                     option.username = args[1];
@@ -81,7 +91,7 @@ namespace SmzdmBot
             Console.WriteLine(JsonConvert.SerializeObject(option));
             Console.WriteLine("Type any key to continue");
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            if (mode == "search" || mode == "crawl")
+            if (mode == "search")
             {
                 if (File.Exists(option.input))
                 {
@@ -94,14 +104,24 @@ namespace SmzdmBot
                     var urls = lines.Distinct().ToList();
                     if (urls.Count == 0) return;
                     DealSearchBot bot = new DealSearchBot();
-                    if(mode == "search")
-                    {
-                        bot.SearchAll(urls, outputPath);
-                    }
-                    else if(mode == "crawl")
-                    {
-                        bot.Crawl(urls[0], outputPath, 50);
-                    }
+                    bot.SearchAll(urls, outputPath);
+                }
+                else
+                {
+                    Console.WriteLine(args[0] + " file does not exist.");
+                }
+                Console.WriteLine("Finished Deal Search.");
+                return;
+            }
+            else if (mode == "crawl")
+            {
+                if (File.Exists(option.input))
+                {
+                    var outputPath = option.output;
+                    var lines = File.ReadAllLines(option.input).ToList();
+                    if (lines.Count == 0) return;
+                    DealSearchBot bot = new DealSearchBot();
+                    bot.Crawl(lines[0], outputPath, option.CrawlCount);
                 }
                 else
                 {
@@ -168,17 +188,17 @@ namespace SmzdmBot
             return;
         }
 
-        public static List<string> GetItemList(SmzdmWorker helper)
+        public static List<string> GetItemList(SmzdmWorker bot)
         {
             var list = new List<string>();
             var _list = new List<string>();
-            if (helper.option.sourceUrl.StartsWith("http"))
+            if (bot.option.sourcePath.StartsWith("http"))
             {
-                list = getGoodsItemListByDriver(helper.driver, helper.option.sourceUrl);
+                list = getGoodsItemListByDriver(bot.driver, bot.option.sourcePath);
             }
             else
             {
-                var lines = File.ReadAllLines(helper.option.sourceUrl);
+                var lines = File.ReadAllLines(bot.option.sourcePath);
                 _list.AddRange(lines);
                 var priceList = new List<Price>();
                 foreach (var line in _list)
@@ -202,23 +222,16 @@ namespace SmzdmBot
             list = list.Distinct().ToList().Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
 
 
-            if (helper.option.itemLinkOrder == 1)
+            if (bot.option.itemLinkOrder == 1)
             {
                 list.Reverse();
             }
-            if (helper.option.itemLinkOrder == 2)
+            if (bot.option.itemLinkOrder == 2)
             {
                 list = Helper.ShuffleList<string>(list);
             }
             return list;
         }
-
-        //public static string SearchDeal(IWebDriver driver, string url)
-        //{
-        //    driver.Navigate().GoToUrl(url);
-        //    return driver.FindElement(By.Id("priceDom")).Text;
-        //}
-
 
         private static List<string> getGoodsItemListByDriver(IWebDriver driver, string url, int retry = 10)
         {
@@ -243,46 +256,5 @@ namespace SmzdmBot
             }
             return res.Distinct().ToList();
         }
-        //private static string CheckJDHref(string href)
-        //{
-        //    int index = href.IndexOf(".html");
-        //    if (index > 0)
-        //    {
-        //        href = href.Substring(0, index) + ".html";
-        //    }
-        //    if (href == null) return "";
-        //    if (href.StartsWith("https://item.jd.com/"))
-        //    {
-        //        return href.Replace("https://", "");
-        //    }
-        //    //item.jd.com/5861956.html
-        //    if ((href.StartsWith(@"//item.jd.com/") || href.StartsWith(@"//item.jd.hk/")))
-        //    {
-        //        return href.Replace("//", "");
-        //    }
-        //    return "";
-        //}
-
-        //private static string CheckKaoLaHref(string href)
-        //{
-        //    if (href == null) return "";
-        //    int index = href.IndexOf(".html");
-        //    if (index > 0)
-        //    {
-        //        href = href.Substring(0, index) + ".html";
-        //    }
-        //    if (href.StartsWith("https://goods.kaola.com/product/"))
-        //    {
-        //        return href.Replace("https://", "");
-        //    }
-        //    //item.jd.com/5861956.html
-        //    if ((href.StartsWith(@"//goods.kaola.com/product/")))
-        //    {
-        //        return href.Replace("//", "");
-        //    }
-        //    return "";
-        //}
-
-
     }
 }

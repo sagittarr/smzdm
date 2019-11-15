@@ -10,7 +10,7 @@ namespace SmzdmBot
     {
         public string username = "";
         public string password = "";
-        public string sourceUrl = "";
+        public string sourcePath = "";
         public int itemLinkOrder = 0;
         public int waitBaoliao = 0;
         public int descriptionMode = 0;
@@ -18,6 +18,7 @@ namespace SmzdmBot
         public string CustomDescriptionPrefix = "";
         public string output = "";
         public string input = "";
+        public int CrawlCount = 50;
         public Option()
         {
 
@@ -26,7 +27,7 @@ namespace SmzdmBot
         {
             username = args[0];
             password = args[1];
-            sourceUrl = args[2];
+            sourcePath = args[2];
             itemLinkOrder = int.Parse(args[3]);
             waitBaoliao = int.Parse(args[4]);
             descriptionMode = int.Parse(args[5]);

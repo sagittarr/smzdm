@@ -13,7 +13,8 @@ namespace SmzdmBot
     public class SmzdmWorker
     {
         public int Level = -1;
-        public int BaoLiaoLeft = -1;
+        public int baoLiaoLeft = -1;
+        public int startNumber = -1;
         public string nickName = "";
         public int gold = -1;
         public Option option;
@@ -53,7 +54,7 @@ namespace SmzdmBot
             }
             if (File.Exists(output))
             {
-                File.AppendAllText(output, "username:" + option.username + "," + "nickName:" + nickName + ",level:" + Level + ",gold:" + gold + ",left:" + BaoLiaoLeft + ",loginTime:" + DateTime.Now + ",status:" + status.Replace("\r", "").Replace("\n", "") + "\n");
+                File.AppendAllText(output, "username:" + option.username + "," + "nickName:" + nickName + ",level:" + Level + ",gold:" + gold + ",left:" + baoLiaoLeft + ",loginTime:" + DateTime.Now + ",status:" + status.Replace("\r", "").Replace("\n", "") + "\n");
             }
             else
             {
@@ -195,14 +196,18 @@ namespace SmzdmBot
                 if (ns.Length == 2)
                 {
                     var level = new string(ns[0].Where(c => Char.IsDigit(c)).ToArray());
-                    var baoLiaoLeft = new string(ns[1].Where(c => Char.IsDigit(c)).ToArray());
-                    if (level != null && baoLiaoLeft != null)
+                    var baoLiaoLeftStr = new string(ns[1].Where(c => Char.IsDigit(c)).ToArray());
+                    if (level != null && baoLiaoLeftStr != null)
                     {
                         Level = int.Parse(level);
                         //baoLiaoLeft = int.Parse(baoLiaoLeft);
                         //Console.WriteLine("Level " + level + " Bao Liao left " + baoLiaoLeft);
-                        BaoLiaoLeft = int.Parse(baoLiaoLeft);
-                        return BaoLiaoLeft;
+                        this.baoLiaoLeft = int.Parse(baoLiaoLeftStr);
+                        if (startNumber == -1)
+                        {
+                            startNumber = this.baoLiaoLeft;
+                        }
+                        return this.baoLiaoLeft;
                     }
                 }
             }
@@ -214,7 +219,7 @@ namespace SmzdmBot
         //2=stop and quit
         public int PasteItemUrl(string url, int index, int timeWait, int stopNumber)
         {
-            if (BaoLiaoLeft != -1 && BaoLiaoLeft <= stopNumber) return 2;
+            if (baoLiaoLeft != -1 && startNumber - baoLiaoLeft >= stopNumber) return 2;
             driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
             Console.WriteLine("Pasting " + index + " " + url);
             driver.FindElement(By.Name("item_link")).SendKeys(url); //item.jd.com/100005093980.html
@@ -231,7 +236,7 @@ namespace SmzdmBot
                 Thread.Sleep(timeWait * 1000);
                 //var pop2 = driver.FindElement(By.Id("pop2"));
                 int left = ReadInfo();
-                if (left != -1 && left <= option.baoLiaoStopNumber)
+                if (left != -1 && startNumber - baoLiaoLeft >= stopNumber)
                 {
                     Console.WriteLine("Quit loop");
                     return 2;

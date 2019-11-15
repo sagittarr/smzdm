@@ -51,7 +51,7 @@ namespace SmzdmBot
                     File.AppendAllText(outputPath, JsonConvert.SerializeObject(price) + "\n");
                     File.AppendAllText(outputPath, price.sourceUrl + "\n");
                 }
-                var newLinks = GetNewLinks();
+                var newLinks = GetNewLinks(url);
                 if (newLinks == null) continue;
                 newLinks = newLinks.Except(visited).ToList();
                 foreach(var link in newLinks)
@@ -109,17 +109,6 @@ namespace SmzdmBot
                 price.Calculate();
                 Console.WriteLine(JsonConvert.SerializeObject(price));
                 return price;
-                //File.AppendAllText(@"D:\test.txt", JsonConvert.SerializeObject(price) + "\n");
-                //if (price.oldPrice != 0 && price.finalPrice != 0 && price.finalPrice < price.oldPrice)
-                //{
-                //    Print(price.oldPrice + " " + price.finalPrice);
-                //    return price;
-                //}
-                //else if (price.retainage > 0 && price.deposit > 0 && price.finalPrice < price.oldPrice)
-                //{
-                //    Print(price.finalPrice.ToString());
-                //    return price;
-                //}
             }
             else if (url.StartsWith("https://item.jd.com/"))
             {
@@ -168,10 +157,11 @@ namespace SmzdmBot
             return null;
         }
 
-        public List<string> GetNewLinks()
+        public List<string> GetNewLinks(string url)
         {
             try
             {
+                driver.Navigate().GoToUrl(url);
                 var elements = driver.FindElements(By.TagName("a")).ToList();
                 List<string> links = elements.Select(x => Helper.CheckUrl(x.GetAttribute("href"))).ToList();
                 return links.Where(x => !String.IsNullOrWhiteSpace(x)).Distinct().ToList();
