@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenQA.Selenium;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,8 @@ namespace SmzdmBot
         public string output = "";
         public string input = "";
         public int CrawlCount = 50;
+        public string browser = "firefox";
+        public string pageNumbers = "500,502,504";
         public Option()
         {
 
@@ -38,6 +41,26 @@ namespace SmzdmBot
     }
     public class Helper
     {
+        public static bool ToUrl(IWebDriver driver, string url)
+        {
+            try
+            {
+                driver.Navigate().GoToUrl(url);
+            }
+            catch (WebDriverException e)
+            {
+                try
+                {
+                    driver.Navigate().Refresh();
+                }
+                catch (WebDriverException e1)
+                {
+                    Console.WriteLine("Web Exception skip " + url);
+                    return false;
+                }
+            }
+            return true;
+        }
         public static string ParseDigits(string input)
         {
             return new string(input.Where(x => x == '.' || Char.IsDigit(x)).ToArray());
@@ -56,7 +79,34 @@ namespace SmzdmBot
             }
             return randomList; //return the new random list
         }
-
+        public static string ParseShoppingPlatform(string url)
+        {
+            if (url.StartsWith("https://product.suning.com/") || url.StartsWith("http://product.suning.com/"))
+            {
+                return "苏宁易购";
+            }
+            else if(url.StartsWith(@"https://item.jd.com/") || url.StartsWith(@"https://item.jd.hk/") || url.StartsWith(@"https://re.jd.com/"))
+            {
+                return "京东";
+            }
+            else if (url.StartsWith("https://goods.kaola.com/product/"))
+            {
+                return "考拉海购";
+            }
+            else if (url.StartsWith("https://www.xiaomiyoupin.com/"))
+            {
+                return "小米有品";
+            }
+            else if (url.StartsWith("https://world.tmall.com/item/") || url.StartsWith("https://detail.tmall.com/item.htm?"))
+            {
+                return "天猫";
+            }
+            else if (url.StartsWith("https://mobile.yangkeduo.com/"))
+            {
+                return "拼多多";
+            }
+            return "";
+        }
         public static string CheckUrl(string url)
         {
             if (url == null) return "";
@@ -68,11 +118,11 @@ namespace SmzdmBot
                     return url.Substring(0, index) + ".html";
                 }
             }
-            else if ((url.StartsWith(@"https://item.jd.com/") || url.StartsWith(@"https://item.jd.hk/")) && !url.EndsWith("comment"))
+            else if ((url.StartsWith(@"https://item.jd.com/") || url.StartsWith(@"https://item.jd.hk/") || url.StartsWith("https://re.jd.com/")) && !url.EndsWith("comment"))
             {
                 return url;
             }
-            else if ((url.StartsWith(@"//item.jd.com/") || url.StartsWith(@"//item.jd.hk/")) && !url.EndsWith("comment"))
+            else if ((url.StartsWith(@"//item.jd.com/") || url.StartsWith(@"//item.jd.hk/") || url.StartsWith(@"//re.jd.com/")) && !url.EndsWith("comment"))
             {
                 return url.Replace("//", "");
             }

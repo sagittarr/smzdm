@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,215 @@ namespace SmzdmBot
     public class DealSearchBot
     {
         bool login = false;
-        private IWebDriver driver;
+        public IWebDriver driver;
         public DealSearchBot()
         {
             driver = new FirefoxDriver();
+            //driver = new ChromeDriver();
         }
+
+        public Dictionary<string, string> GetSmzdmItem(IWebElement item)
+        {
+            Console.WriteLine(item.Text);
+            var oldPrice = 0.0;
+            var lines = item.Text.Split('\n');
+            var itemTitle = "";
+            if (lines.Length >= 2)
+            {
+                if (lines[0].IndexOf("件") != -1 || lines[1].IndexOf("合") != -1)
+                {
+                    Console.WriteLine("complicated price skip ");
+                    return null;
+                }
+                int idx = lines[1].IndexOf("元");
+                if (idx != -1)
+                {
+                    var priceStr = lines[1].Substring(0, idx);
+                    try
+                    {
+                        oldPrice = double.Parse(Helper.ParseDigits(priceStr));
+                        if (oldPrice < 10) return null;
+                    }
+                    catch (System.FormatException)
+                    {
+                        return null;
+                    }
+                    itemTitle = lines[0];
+                    Console.WriteLine("old price " + oldPrice);
+                }
+            }
+            else
+            {
+                return null;
+            }
+
+            var elements = item.FindElements(By.TagName("a")).ToList();
+            var goSmzdmUrl = "";
+            var itemSmzdmUrl = "";
+            foreach (IWebElement e in elements)
+            {
+                var href = e.GetAttribute("href");
+                if (goSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://go.smzdm.com/"))
+                {
+                    goSmzdmUrl = href;
+                    Console.WriteLine(href);
+                }
+                else if (itemSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://www.smzdm.com/p/") && !href.EndsWith("comment"))
+                {
+                    itemSmzdmUrl = href;
+                    Console.WriteLine(href);
+                }
+
+                if (goSmzdmUrl != "" && itemSmzdmUrl != "")
+                {
+                    var it = new Dictionary<string, string>();
+                    it.Add("smzdmProduct", itemSmzdmUrl);
+                    it.Add("smzdmGo", goSmzdmUrl);
+                    it.Add("smzdmOldPrice", oldPrice.ToString());
+                    it.Add("smzdmItemTitle", itemTitle);
+                    return it;
+                }
+            }
+            return null;
+        }
+        public Price CheckSmzdmItem(Dictionary<string, string> it)
+        {
+            if (it == null) return null;
+            if (Helper.ToUrl(driver, it["smzdmProduct"]))
+            {
+                try
+                {
+                    driver.FindElement(By.ClassName("new-baike-card"));
+                    if (Helper.ToUrl(driver, it["smzdmGo"]))
+                    {
+                        var p = new Price();
+                        p.SmzdmGoodPrice = double.Parse(it["smzdmOldPrice"]);
+                        p.sourceUrl = driver.Url;
+                        p.SmzdmItemTitle = it["smzdmItemTitle"];
+                        p.SmzdmGoUrl = it["smzdmGo"];
+                        
+                        Console.WriteLine("added " + p.sourceUrl + " " + p.SmzdmGoodPrice);
+                        return p;
+                    }
+                }
+                catch (NoSuchElementException e)
+                {
+                    Console.WriteLine("No Baike, drop " + it["smzdmProduct"]);
+                }
+            }
+            return null;
+        }
+        public List<Price> GetSmzdmItems(Option option)
+        {
+            var deals = new List<Price>();
+            var pages = new List<string>();
+            foreach (var pn in option.pageNumbers.Split(','))
+            {
+                pages.Add("https://www.smzdm.com/jingxuan/p" + pn + "/");
+            }
+            foreach (var page in pages)
+            {
+                driver.Navigate().GoToUrl(page);
+
+                var items = driver.FindElements(By.ClassName("z-feed-content")).ToList();
+                Console.WriteLine(items.Count);
+                var SmzdmList = new List<Dictionary<string, string>>();
+
+                foreach (IWebElement item in items)
+                {
+                    Console.WriteLine(item.Text);
+                    var oldPrice = 0.0;
+                    var lines = item.Text.Split('\n');
+                    var itemTitle = "";
+                    if (lines.Length >= 2)
+                    {
+                        if (lines[0].IndexOf("件") != -1 || lines[1].IndexOf("合") != -1)
+                        {
+                            Console.WriteLine("complicated price skip ");
+                            continue;
+                        }
+                        int idx = lines[1].IndexOf("元");
+                        if (idx != -1)
+                        {
+                            var priceStr = lines[1].Substring(0, idx);
+                            try
+                            {
+                                oldPrice = double.Parse(Helper.ParseDigits(priceStr));
+                                if (oldPrice < 10) continue;
+                            }
+                            catch (System.FormatException)
+                            {
+                                continue;
+                            }
+                            itemTitle = lines[0];
+                            Console.WriteLine("old price " + oldPrice);
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    
+                    var elements = item.FindElements(By.TagName("a")).ToList();
+                    var goSmzdmUrl = "";
+                    var itemSmzdmUrl = "";
+                    foreach (IWebElement e in elements)
+                    {
+                        var href = e.GetAttribute("href");
+                        if (goSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://go.smzdm.com/"))
+                        {
+                            goSmzdmUrl = href;
+                            Console.WriteLine(href);
+                        }
+                        else if (itemSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://www.smzdm.com/p/") && !href.EndsWith("comment"))
+                        {
+                            itemSmzdmUrl = href;
+                            Console.WriteLine(href);
+                        }
+
+                        if (goSmzdmUrl != "" && itemSmzdmUrl != "")
+                        {
+                            var it = new Dictionary<string, string>();
+                            it.Add("smzdmProduct", itemSmzdmUrl);
+                            it.Add("smzdmGo", goSmzdmUrl);
+                            it.Add("smzdmOldPrice", oldPrice.ToString());
+                            it.Add("smzdmItemTitle", itemTitle);
+                            SmzdmList.Add(it);
+                            break;
+                        }
+                    }
+
+                }
+
+                foreach (var it in SmzdmList)
+                {
+                    if (Helper.ToUrl(driver,it["smzdmProduct"]))
+                    {
+                        try
+                        {
+                            driver.FindElement(By.ClassName("new-baike-card"));
+                            if (Helper.ToUrl(driver, it["smzdmGo"]))
+                            {
+                                var p = new Price();
+                                p.SmzdmGoodPrice = double.Parse(it["smzdmOldPrice"]);
+                                p.sourceUrl = driver.Url;
+                                p.SmzdmItemTitle = it["smzdmItemTitle"];
+                                p.SmzdmGoUrl = it["smzdmGo"];
+                                deals.Add(p);
+                                Console.WriteLine("added " + p.sourceUrl + " " + p.SmzdmGoodPrice);
+                            }
+                        }
+                        catch (NoSuchElementException e)
+                        {
+                            Console.WriteLine("No Baike, drop " + it["smzdmProduct"]);
+                        }
+                    }
+                }
+            }
+            return deals;
+        }
+
+
         public Price ParsePrice(string text, string source)
         {
             if (source.Contains("suning.com"))
@@ -164,10 +369,16 @@ namespace SmzdmBot
             {
                 driver.Navigate().GoToUrl(url);
                 var elements = driver.FindElements(By.TagName("a")).ToList();
+                //elements.ForEach(x => Console.WriteLine(x.GetAttribute("href")));
                 List<string> links = elements.Select(x => Helper.CheckUrl(x.GetAttribute("href"))).ToList();
                 return links.Where(x => !String.IsNullOrWhiteSpace(x)).Distinct().ToList();
             }
             catch(NoSuchElementException e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
+            catch(StaleElementReferenceException e)
             {
                 Console.WriteLine(e.Message);
                 return null;

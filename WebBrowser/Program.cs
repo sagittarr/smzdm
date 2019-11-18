@@ -53,10 +53,15 @@ namespace SmzdmBot
             //RunTasks();
             //Console.ReadKey();
             Option option = new Option();
-            if (args.Length>1)
+            if (args.Length>=1)
             {
                 mode = args[0];
-                if(mode == "search" || mode == "crawl")
+                if(mode == "smzdm")
+                {
+                    option.output = args[1];
+                    option.pageNumbers = args[2];
+                }
+                else if(mode == "search")
                 {
                     option.input = args[1];
                     option.output = args[2];
@@ -81,6 +86,11 @@ namespace SmzdmBot
                 {
                     option = new Option(args.Skip(1).ToArray());
                 }
+                else if (mode == "smzdm_share")
+                {
+                    option = new Option(args.Skip(1).ToArray());
+                    option.pageNumbers = args[10];
+                }
             }
             else
             {
@@ -89,9 +99,84 @@ namespace SmzdmBot
                 return;
             }
             Console.WriteLine(JsonConvert.SerializeObject(option));
-            Console.WriteLine("Type any key to continue");
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            if (mode == "search")
+            if(mode == "smzdm")
+            {
+                DealSearchBot bot = new DealSearchBot();
+                var list = bot.GetSmzdmItems(option).ToList();
+                var output = new List<string>();
+                list.ForEach(x => output.Add(JsonConvert.SerializeObject(x)));
+                if (File.Exists(option.output))
+                {
+                    File.WriteAllLines(option.output, output.ToArray());
+                }
+                else
+                {
+                    Console.WriteLine(option.output + " file does not exist.");
+                    return;
+                }
+            }
+            else if (mode == "smzdm_share")
+            {
+                DealSearchBot bot = new DealSearchBot();
+                var pages = new List<string>();
+                var pagesArr = option.pageNumbers.Split('-');
+                var st = int.Parse(pagesArr[0]);
+                var end = int.Parse(pagesArr[1]);
+                for(int i = st; i<= end; i++)
+                {
+                    pages.Add("https://www.smzdm.com/jingxuan/p" + i.ToString() + "/");
+                }
+                var helper = new SmzdmWorker(option);
+                if (!helper.Login())
+                {
+                    return;
+                }
+                var smzdmItemList = new List<Dictionary<string, string>>();
+                foreach (var page in pages)
+                {
+                    bot.driver.Navigate().GoToUrl(page);
+                    var items = bot.driver.FindElements(By.ClassName("z-feed-content")).ToList();
+                    
+                    foreach(IWebElement item in items)
+                    {
+                        var it = bot.GetSmzdmItem(item);
+                        if (it != null)
+                        {
+                            smzdmItemList.Add(it);
+                        }
+
+                    }
+                }
+                Console.WriteLine("Potential good price count " + smzdmItemList.Count);
+                foreach (var it in smzdmItemList)
+                {
+                    var price = bot.CheckSmzdmItem(it);
+                    if (price != null)
+                    {
+                        var goodPrice = price.SmzdmGoodPrice;
+                        var sourceUrl = price.sourceUrl;
+                        var code = helper.PasteItemUrl(sourceUrl, 0, option.waitBaoliao, option.baoLiaoStopNumber);
+                        if (code == 1) helper.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl);
+                        else if (code == 2)
+                        {
+                            break;
+                        }
+                    }
+                }
+                Console.WriteLine("Finished.");
+                helper.OutputStatus();
+                if (helper.gold > 1)
+                {
+                    Console.WriteLine(option.username + " gold=" + helper.gold);
+                }
+                else
+                {
+                    helper.Shutdown();
+                }
+                return;
+            }
+            else if (mode == "search")
             {
                 if (File.Exists(option.input))
                 {
@@ -133,22 +218,52 @@ namespace SmzdmBot
             else if (mode == "share")
             {
                 var helper = new SmzdmWorker(option);
-                var list = GetItemList(helper);
+                //var list = GetItemList(helper);
+                var list =  File.ReadAllLines(option.sourcePath).ToList();
+                if(list == null || list.Count == 0)
+                {
+                    return;
+                }
                 if (!helper.Login())
                 {
                     return;
                 }
                 int i = 0;
+                list = Helper.ShuffleList<string>(list);
+                var visited = new HashSet<string>();
                 while (i < list.Count)
                 {
+                    var goodPrice = 0.0;
+                    var oldPrice = 0.0;
+                    var sourceUrl = "";
                     var code = 0;
                     while (0 == code && i < list.Count)
                     {
-                        code = helper.PasteItemUrl(list[i], i, option.waitBaoliao, option.baoLiaoStopNumber);
+                        if (list[i].StartsWith("{"))
+                        {
+                            var price = JsonConvert.DeserializeObject<Price>(list[i]);
+                            goodPrice = price.SmzdmGoodPrice;
+                            sourceUrl = Helper.CheckUrl(price.sourceUrl);
+                            oldPrice = price.oldPrice;
+                        }
+                        //else 
+                        //{
+                        //    var url = Helper.CheckUrl(list[i]);
+                        //    if (url != null)
+                        //    {
+                        //        sourceUrl = url;
+                        //    }
+                        //}
+                        if (!String.IsNullOrWhiteSpace(sourceUrl) && !visited.Contains(sourceUrl))
+                        {
+                            visited.Add(sourceUrl);
+                            code = helper.PasteItemUrl(sourceUrl, i, option.waitBaoliao, option.baoLiaoStopNumber);
+                        }
                         i++;
                     }
-                    if (code == 2) break;
-                    helper.SubmitBaoLiao(option.descriptionMode);
+                    if (code == 2) break; // 2 reach end condition, quit
+                                          // 1 continue submit
+                    helper.SubmitBaoLiao(option.descriptionMode, goodPrice, oldPrice, sourceUrl);
                 }
                 Console.WriteLine("Finished.");
                 helper.OutputStatus();

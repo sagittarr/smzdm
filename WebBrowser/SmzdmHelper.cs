@@ -83,7 +83,8 @@ namespace SmzdmBot
         }
 
 
-        public bool SubmitBaoLiao(int despMode)
+
+        public bool SubmitBaoLiao(int despMode, double smzdmGoodPrice, double oldPrice, string url)
         {
             var price = driver.FindElement(By.Id("un-item-price")).GetAttribute("value");
             var name = driver.FindElement(By.Id("un-item-goods")).GetAttribute("value");
@@ -91,18 +92,43 @@ namespace SmzdmBot
 
             if (!String.IsNullOrWhiteSpace(price) && !String.IsNullOrWhiteSpace(name) && !String.IsNullOrWhiteSpace(name))
             {
-                Console.WriteLine("price " + price);
+                
+                var p = double.Parse(price);
+                if (smzdmGoodPrice > 0 && p > smzdmGoodPrice * 1.12)
+                {
+                    Console.WriteLine("price is not good " + p + " " + smzdmGoodPrice);
+                    return true;
+                }
+                if (smzdmGoodPrice > 0 && p < smzdmGoodPrice * 0.5)
+                {
+                    Console.WriteLine("price is too good " + p + " " + smzdmGoodPrice);
+                    return true;
+                }
+                if (oldPrice > 0 && p > oldPrice * 0.9)
+                {
+                    Console.WriteLine("price is not good " + p + " " + oldPrice);
+                    return true;
+                }
                 var desp = driver.FindElement(By.Id("un-content-price"));
                 if (desp != null)
                 {
-
+                    Console.WriteLine("price " + price + " "+ smzdmGoodPrice);
+                    var source = Helper.ParseShoppingPlatform(url);
+                    
                     if (despMode == 1)
                     {
                         desp.SendKeys("预计到手价" + price + "!");
                     }
                     else if (despMode == 0)
                     {
-                        desp.SendKeys(name + " 预计到手价" + price + "!");
+                        if (source != "")
+                        {
+                            desp.SendKeys("现促销价" + price + " " + "价格来自" +source);
+                        }
+                        else
+                        {
+                            desp.SendKeys(name + " 预计到手价" + price );
+                        }
                     }
                     else
                     {
@@ -138,8 +164,8 @@ namespace SmzdmBot
                 {
                     if (f.Text.Contains("分钟"))
                     {
-                        Console.WriteLine("Too frequent submit, Sleep for 70 seconds.");
-                        var count = 70;
+                        Console.WriteLine("Too frequent submit, Sleep for 80 seconds.");
+                        var count = 80;
                         while (count > 0)
                         {
                             Thread.Sleep(10000);
@@ -221,11 +247,10 @@ namespace SmzdmBot
         {
             if (baoLiaoLeft == 0) return 2;
             if (baoLiaoLeft != -1 && startNumber - baoLiaoLeft >= stopNumber) return 2;
-            driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
-            Console.WriteLine("Pasting " + index + " " + url);
+            Helper.ToUrl(driver, @"https://www.smzdm.com/baoliao/?old");
+            Console.WriteLine("Pasting " + url);
             driver.FindElement(By.Name("item_link")).SendKeys(url); //item.jd.com/100005093980.html
             driver.FindElement(By.Id("get_info_btn")).Click();
-
             int countDown = 3;
             while (countDown > 0)
             {

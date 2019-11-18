@@ -9,10 +9,7 @@ namespace SmzdmBot
 {
     public class SUNINGPriceParser
     {
-        public static string ParseDigits(string input)
-        {
-            return new string(input.Where(x => x == '.' || Char.IsDigit(x)).ToArray());
-        }
+
         public static string ParseShopName(string text)
         {
             text = text.Replace("\r", "").Replace(" ","");
@@ -78,19 +75,19 @@ namespace SmzdmBot
                         switch (whatToRead)
                         {
                             case "old":
-                                price.oldPrice = Double.Parse(ParseDigits(line));
+                                price.oldPrice = Double.Parse(Helper.ParseDigits(line));
                                 whatToRead = "";
                                 break;
                             case "current":
-                                price.currentPrice = Double.Parse(ParseDigits(line));
+                                price.currentPrice = Double.Parse(Helper.ParseDigits(line));
                                 whatToRead = "";
                                 break;
                             case "deposit":
-                                price.deposit = Double.Parse(ParseDigits(line));
+                                price.deposit = Double.Parse(Helper.ParseDigits(line));
                                 whatToRead = "";
                                 break;
                             case "retainage":
-                                price.retainage = Double.Parse(ParseDigits(line));
+                                price.retainage = Double.Parse(Helper.ParseDigits(line));
                                 whatToRead = "";
                                 break;
                             case "cut1":
@@ -102,8 +99,8 @@ namespace SmzdmBot
                                 {
                                     if (tokens[0].StartsWith("每") && tokens[1].StartsWith("减"))
                                     {
-                                        reach = Double.Parse(ParseDigits(tokens[0]));
-                                        cut = Double.Parse(ParseDigits(tokens[1]));
+                                        reach = Double.Parse(Helper.ParseDigits(tokens[0]));
+                                        cut = Double.Parse(Helper.ParseDigits(tokens[1]));
                                         price.coupons.Add(new List<double>() { reach, cut, top });
                                     }
                                     else
@@ -115,9 +112,9 @@ namespace SmzdmBot
                                 {
                                     if (tokens[0].StartsWith("每") && tokens[1].StartsWith("减") && tokens[2].Contains("最多减"))
                                     {
-                                        reach = Double.Parse(ParseDigits(tokens[0]));
-                                        cut = Double.Parse(ParseDigits(tokens[1]));
-                                        top = Double.Parse(ParseDigits(tokens[2]));
+                                        reach = Double.Parse(Helper.ParseDigits(tokens[0]));
+                                        cut = Double.Parse(Helper.ParseDigits(tokens[1]));
+                                        top = Double.Parse(Helper.ParseDigits(tokens[2]));
                                         price.coupons.Add(new List<double>() { reach, cut, top });
                                     }
                                     else
@@ -134,8 +131,8 @@ namespace SmzdmBot
                                     coupon = coupon[1].Split(new string[] { "用" }, StringSplitOptions.None);
                                     if (coupon.Length == 2)
                                     {
-                                        var reach2 = Double.Parse(ParseDigits(coupon[0]));
-                                        var cut2 = Double.Parse(ParseDigits(coupon[1]));
+                                        var reach2 = Double.Parse(Helper.ParseDigits(coupon[0]));
+                                        var cut2 = Double.Parse(Helper.ParseDigits(coupon[1]));
                                         price.coupons.Add(new List<double>() { reach2, cut2 });
                                     }
                                 }

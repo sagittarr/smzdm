@@ -20,6 +20,11 @@ namespace SmzdmBot
         public string storeName { get; set; }
 
         public string ItemName { get; set; }
+
+        public double SmzdmGoodPrice { get; set; }
+        public string SmzdmItemTitle { get; set; }
+
+        public string SmzdmGoUrl { get; set; }
         public Price()
         {
             coupons = new List<List<double>>();
