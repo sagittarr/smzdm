@@ -6,6 +6,18 @@ using System.Threading.Tasks;
 
 namespace SmzdmBot
 {
+    public class SmzdmWiki
+    {
+        public double SmzdmGoodPrice { get; set; }
+        public string SmzdmItemTitle { get; set; }
+        public List<string> SmzdmGoUrls { get; set; }
+
+        public string SmzdmProductUrl { get; set; }
+        public SmzdmWiki()
+        {
+            SmzdmGoUrls = new List<string>();
+        }
+    }
     public class Price
     {
         //public string itemTitle { get; set; }

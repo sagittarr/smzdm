@@ -20,7 +20,68 @@ namespace SmzdmBot
             driver = new FirefoxDriver();
             //driver = new ChromeDriver();
         }
-
+        public List<string> GetItemIdFromWikiPage(string wikiPage)
+        {
+            if (wikiPage == null) return null;
+            var itemUrls = new List<string>();
+            if (Helper.ToUrl(driver, "https://wiki.smzdm.com/" + wikiPage + "/"))
+            {
+                var emlist = driver.FindElement(By.ClassName("feed-main-list"));
+                foreach (var elm in emlist.FindElements(By.TagName("a")))
+                {
+                    if (elm.GetAttribute("href").StartsWith("https://wiki.smzdm.com/p/"))
+                    {
+                        itemUrls.Add(elm.GetAttribute("href"));
+                    }
+                }
+            }
+            return itemUrls;
+        }
+        public SmzdmWiki GetLinkFromWiki(string wikiUrl)
+        {
+            if (wikiUrl == null) return null;
+            
+            if (Helper.ToUrl(driver, wikiUrl))
+            {
+                var linkList = new List<string>();
+                try
+                {
+                    var title = driver.FindElement(By.ClassName("pd-title")).Text; 
+                    var mainPriceText = driver.FindElement(By.ClassName("sku-pd-price")).Text;
+                    var mainPrice = 0.0;
+                    if (title.Contains("羽绒服")) return null;
+                    var index = mainPriceText.IndexOf("元");
+                    if (index == -1) return null;
+                    try
+                    {
+                        mainPrice = double.Parse(mainPriceText.Substring(0, index));
+                    }
+                    catch (Exception)
+                    {
+                        return null;
+                    }
+                    var malls = driver.FindElements(By.ClassName("mall-price")).ToList();
+                    foreach(IWebElement element in malls)
+                    {
+                        var href = element.GetAttribute("href");
+                        if (href.StartsWith("https://go.smzdm.com/"))
+                        {
+                            linkList.Add(href);
+                        }
+                    }
+                    var wiki = new SmzdmWiki();
+                    wiki.SmzdmGoUrls.AddRange(linkList);
+                    wiki.SmzdmGoodPrice = mainPrice;
+                    wiki.SmzdmItemTitle = title;
+                    return wiki;
+                }
+                catch (NoSuchElementException)
+                {
+                    return null;
+                }
+            }
+            return null;
+        }
         public Dictionary<string, string> GetSmzdmItem(IWebElement item)
         {
             Console.WriteLine(item.Text);
@@ -111,6 +172,25 @@ namespace SmzdmBot
                 }
             }
             return null;
+        }
+
+        public List<Price> CheckSmzdmItem(SmzdmWiki it)
+        {
+            if (it == null) return null;
+            var list = new List<Price>();
+            foreach (var link in it.SmzdmGoUrls)
+            {
+                if (Helper.ToUrl(driver, link))
+                {
+                    var p = new Price();
+                    p.SmzdmGoodPrice = it.SmzdmGoodPrice;
+                    p.sourceUrl = driver.Url;
+                    p.SmzdmItemTitle = it.SmzdmItemTitle;
+                    p.SmzdmGoUrl = link;
+                    list.Add(p);
+                }
+            }
+            return list;
         }
         public List<Price> GetSmzdmItems(Option option)
         {

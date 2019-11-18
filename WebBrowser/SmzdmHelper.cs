@@ -84,7 +84,7 @@ namespace SmzdmBot
 
 
 
-        public bool SubmitBaoLiao(int despMode, double smzdmGoodPrice, double oldPrice, string url)
+        public bool SubmitBaoLiao(int despMode, double smzdmGoodPrice, double oldPrice, string url, double rate1, double rate2)
         {
             var price = driver.FindElement(By.Id("un-item-price")).GetAttribute("value");
             var name = driver.FindElement(By.Id("un-item-goods")).GetAttribute("value");
@@ -94,7 +94,7 @@ namespace SmzdmBot
             {
                 
                 var p = double.Parse(price);
-                if (smzdmGoodPrice > 0 && p > smzdmGoodPrice * 1.12)
+                if (smzdmGoodPrice > 0 && p > smzdmGoodPrice * rate1)
                 {
                     Console.WriteLine("price is not good " + p + " " + smzdmGoodPrice);
                     return true;
