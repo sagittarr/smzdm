@@ -277,14 +277,15 @@ namespace SmzdmBot
                     var oldPrice = 0.0;
                     var sourceUrl = "";
                     var code = 0;
+                    Price priceObject = null;
                     while (0 == code && i < list.Count)
                     {
                         if (list[i].StartsWith("{"))
                         {
-                            var price = JsonConvert.DeserializeObject<Price>(list[i]);
-                            goodPrice = price.SmzdmGoodPrice;
-                            sourceUrl = Helper.CheckUrl(price.sourceUrl);
-                            oldPrice = price.oldPrice;
+                            priceObject = JsonConvert.DeserializeObject<Price>(list[i]);
+                            goodPrice = priceObject.SmzdmGoodPrice;
+                            sourceUrl = Helper.CheckUrl(priceObject.sourceUrl);
+                            oldPrice = priceObject.oldPrice;
                         }
                         //else 
                         //{
@@ -301,9 +302,17 @@ namespace SmzdmBot
                         }
                         i++;
                     }
-                    if (code == 2) break; // 2 reach end condition, quit
-                                          // 1 continue submit
-                    helper.SubmitBaoLiao(option.descriptionMode, goodPrice, oldPrice, sourceUrl,0.0,0.5);
+                    if (code == 2) break; // 2 reach end condition, quit // 1 continue submit
+
+                    if (priceObject != null)
+                    {
+                        helper.SubmitBaoLiao(option.descriptionMode, goodPrice, oldPrice, sourceUrl, 0.0, 0.9, priceObject);
+                    }
+                    else
+                    {
+                        helper.SubmitBaoLiao(option.descriptionMode, goodPrice, oldPrice, sourceUrl, 0.0, 0.9);
+                    }
+                    
                 }
                 Console.WriteLine("Finished.");
                 helper.OutputStatus();
@@ -343,73 +352,73 @@ namespace SmzdmBot
             return;
         }
 
-        public static List<string> GetItemList(SmzdmWorker bot)
-        {
-            var list = new List<string>();
-            var _list = new List<string>();
-            if (bot.option.sourcePath.StartsWith("http"))
-            {
-                list = getGoodsItemListByDriver(bot.driver, bot.option.sourcePath);
-            }
-            else
-            {
-                var lines = File.ReadAllLines(bot.option.sourcePath);
-                _list.AddRange(lines);
-                var priceList = new List<Price>();
-                foreach (var line in _list)
-                {
-                    if (line.StartsWith("{\""))
-                    {
-                        var p = JsonConvert.DeserializeObject<Price>(line);
-                        if (p != null)
-                        {
-                            priceList.Add(p);
-                        }
-                    }
-                    var u = Helper.CheckUrl(line);
+        //public static List<string> GetItemList(SmzdmWorker bot)
+        //{
+        //    var list = new List<string>();
+        //    var _list = new List<string>();
+        //    if (bot.option.sourcePath.StartsWith("http"))
+        //    {
+        //        list = getGoodsItemListByDriver(bot.driver, bot.option.sourcePath);
+        //    }
+        //    else
+        //    {
+        //        var lines = File.ReadAllLines(bot.option.sourcePath);
+        //        _list.AddRange(lines);
+        //        var priceList = new List<Price>();
+        //        foreach (var line in _list)
+        //        {
+        //            if (line.StartsWith("{\""))
+        //            {
+        //                var p = JsonConvert.DeserializeObject<Price>(line);
+        //                if (p != null)
+        //                {
+        //                    priceList.Add(p);
+        //                }
+        //            }
+        //            var u = Helper.CheckUrl(line);
 
-                    if (!string.IsNullOrWhiteSpace(u))
-                    {
-                        list.Add(u);
-                    }
-                }
-            }
-            list = list.Distinct().ToList().Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+        //            if (!string.IsNullOrWhiteSpace(u))
+        //            {
+        //                list.Add(u);
+        //            }
+        //        }
+        //    }
+        //    list = list.Distinct().ToList().Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
 
 
-            if (bot.option.itemLinkOrder == 1)
-            {
-                list.Reverse();
-            }
-            if (bot.option.itemLinkOrder == 2)
-            {
-                list = Helper.ShuffleList<string>(list);
-            }
-            return list;
-        }
+        //    if (bot.option.itemLinkOrder == 1)
+        //    {
+        //        list.Reverse();
+        //    }
+        //    if (bot.option.itemLinkOrder == 2)
+        //    {
+        //        list = Helper.ShuffleList<string>(list);
+        //    }
+        //    return list;
+        //}
 
-        private static List<string> getGoodsItemListByDriver(IWebDriver driver, string url, int retry = 10)
-        {
-            driver.Navigate().GoToUrl(url);
-            var res = new List<string>();
-            while (res.Count == 0 && retry > 0)
-            {
-                Thread.Sleep(3000);
-                Console.WriteLine("Sleep 3s for webpage loading");
-                retry--;
-                var links = driver.FindElements(By.TagName("a"));
-                foreach (var l in links)
-                {
-                    var href = l.GetAttribute("href");
-                    if (href == null) continue;
-                    var link = Helper.CheckUrl(href);
-                    if (!string.IsNullOrWhiteSpace(link))
-                    {
-                        res.Add(link);
-                    }
-                }
-            }
-            return res.Distinct().ToList();
-        }
+        //private static List<string> getGoodsItemListByDriver(IWebDriver driver, string url, int retry = 10)
+        //{
+        //    driver.Navigate().GoToUrl(url);
+        //    var res = new List<string>();
+        //    while (res.Count == 0 && retry > 0)
+        //    {
+        //        Thread.Sleep(3000);
+        //        Console.WriteLine("Sleep 3s for webpage loading");
+        //        retry--;
+        //        var links = driver.FindElements(By.TagName("a"));
+        //        foreach (var l in links)
+        //        {
+        //            var href = l.GetAttribute("href");
+        //            if (href == null) continue;
+        //            var link = Helper.CheckUrl(href);
+        //            if (!string.IsNullOrWhiteSpace(link))
+        //            {
+        //                res.Add(link);
+        //            }
+        //        }
+        //    }
+        //    return res.Distinct().ToList();
+        //}
     }
 }

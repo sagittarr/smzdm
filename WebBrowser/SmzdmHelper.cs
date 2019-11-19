@@ -84,55 +84,57 @@ namespace SmzdmBot
 
 
 
-        public bool SubmitBaoLiao(int despMode, double smzdmGoodPrice, double oldPrice, string url, double rate1, double rate2)
+        public bool SubmitBaoLiao(int despMode, double smzdmGoodPrice, double oldPrice, string url, double rate1, double rate2, Price priceObject = null)
         {
-            var price = driver.FindElement(By.Id("un-item-price")).GetAttribute("value");
+            var priceText = driver.FindElement(By.Id("un-item-price")).GetAttribute("value");
             var name = driver.FindElement(By.Id("un-item-goods")).GetAttribute("value");
             var brand = driver.FindElement(By.Id("un-item-brand")).GetAttribute("value");
+            var type1 = driver.FindElement(By.Id("search_type_one")).Text;
+            var type2 = driver.FindElement(By.Id("search_type_two")).Text;
+            var type3 = driver.FindElement(By.Id("search_type_three")).Text;
+            var type4 = driver.FindElement(By.Id("search_type_four")).Text;
 
-            if (!String.IsNullOrWhiteSpace(price) && !String.IsNullOrWhiteSpace(name) && !String.IsNullOrWhiteSpace(name))
+            if (!String.IsNullOrWhiteSpace(priceText) && !String.IsNullOrWhiteSpace(name) && !String.IsNullOrWhiteSpace(name))
             {
-                
-                var p = double.Parse(price);
-                if (smzdmGoodPrice > 0 && p > smzdmGoodPrice * rate1)
+                Console.WriteLine("current category is " + type1 + " "+ type2 + " "+ type3 + " "+ type4);
+                if (type1 != null && type1.Contains("服饰鞋包"))
                 {
-                    Console.WriteLine("price is not good " + p + " " + smzdmGoodPrice);
+                    Console.WriteLine("Skip clothes category");
                     return true;
                 }
-                if (smzdmGoodPrice > 0 && p < smzdmGoodPrice * 0.5)
+                var currentPrice = double.Parse(priceText);
+                if (rate1>0.0 && smzdmGoodPrice > 0 && currentPrice > smzdmGoodPrice * rate1)
                 {
-                    Console.WriteLine("price is too good " + p + " " + smzdmGoodPrice);
+                    Console.WriteLine("price is not good " + currentPrice + " " + smzdmGoodPrice);
                     return true;
                 }
-                if (oldPrice > 0 && p > oldPrice * 0.9)
+                if (smzdmGoodPrice > 0 && currentPrice < smzdmGoodPrice * 0.5)
                 {
-                    Console.WriteLine("price is not good " + p + " " + oldPrice);
+                    Console.WriteLine("price is too good " + currentPrice + " " + smzdmGoodPrice);
+                    return true;
+                }
+                if (rate2>0.0 && oldPrice > 0 && currentPrice > oldPrice * rate2)
+                {
+                    Console.WriteLine("price is not good " + currentPrice + " " + oldPrice);
                     return true;
                 }
                 var desp = driver.FindElement(By.Id("un-content-price"));
                 if (desp != null)
                 {
-                    Console.WriteLine("price " + price + " "+ smzdmGoodPrice);
+                    Console.WriteLine("price " + priceText + " "+ smzdmGoodPrice);
                     var source = Helper.ParseShoppingPlatform(url);
                     
                     if (despMode == 1)
                     {
-                        desp.SendKeys("预计到手价" + price + "!");
+                        desp.SendKeys("预计到手价" + priceText + "!");
                     }
                     else if (despMode == 0)
-                    {
-                        if (source != "")
-                        {
-                            desp.SendKeys("现促销价" + price + " " + "价格来自" +source);
-                        }
-                        else
-                        {
-                            desp.SendKeys(name + " 预计到手价" + price );
-                        }
+                    { 
+                        desp.SendKeys(GenerateDesp(priceText, source, priceObject));
                     }
                     else
                     {
-                        desp.SendKeys(option.CustomDescriptionPrefix + " 预计到手价" + price + "!");
+                        desp.SendKeys(option.CustomDescriptionPrefix + " 预计到手价" + priceText + "!");
                     }
 
                 }
@@ -154,7 +156,88 @@ namespace SmzdmBot
             }
             return true;
         }
+        private string GenerateDesp(string priceText, string source, Price priceObject = null)
+        {
+            var random = new Random();
+            var index = 0;
+            var text = "";
+            if (string.IsNullOrWhiteSpace(source)){
+                index = random.Next(4);
+                switch (index)
+                {
+                    case 0:
+                        text = "目前优惠价" +priceText;
+                        break;
+                    case 1:
+                        text = "现促销价" +priceText;
+                        break;
+                    case 2:
+                        text = "优惠后售价" +priceText;
+                        break;
+                    case 3:
+                        text = "预计到手价" + priceText;
+                        break;
+                    default:
+                        text = "目前优惠价" + priceText;
+                        break;
+                }
+            }
+            else
+            {
+                index = random.Next(7);
+                switch (index)
+                {
+                    case 0:
+                        text = "目前"+source+"优惠价" + priceText;
+                        break;
+                    case 1:
+                        if (priceObject.storeName != null)
+                        {
+                            text = "目前优惠价" + priceText + ", 价格来自" + priceObject.storeName;
+                        }
+                        else
+                        {
+                            text = "目前优惠价" + priceText + ", 价格来自" + source;
+                        }
+                        break;
+                    case 2:
+                        text = source+"预计到手价" + priceText;
+                        break;
+                    case 3:
+                        text = source + "活动价" + priceText;
+                        break;
+                    case 4:
+                        text = "优惠后到手价预计" + priceText+ ", 来自" + source;
+                        break;
+                    case 5:
+                        text = source+ "好价" + priceText;
+                        break;
+                    case 6:
+                        text = source + "到手价" + priceText;
+                        break;
 
+                    default:
+                        text = "目前优惠价" + priceText;
+                        break;
+                }
+            }
+            
+            index = random.Next(3);
+            switch (index)
+            {
+                case 0:
+                    text = text + " 喜欢的可以入手";
+                    break;
+                case 1:
+                    text = text + " 有兴趣的值友可以看看";
+                    break;
+                case 2:
+                    break;
+                default:
+                    break;
+            }
+            return text;
+        }
         private bool CheckFrequecyNotice()
         {
             var fails = driver.FindElements(By.ClassName("layerSubInfo"));

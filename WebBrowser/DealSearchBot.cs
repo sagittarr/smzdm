@@ -49,7 +49,7 @@ namespace SmzdmBot
                     var title = driver.FindElement(By.ClassName("pd-title")).Text; 
                     var mainPriceText = driver.FindElement(By.ClassName("sku-pd-price")).Text;
                     var mainPrice = 0.0;
-                    if (title.Contains("羽绒服")) return null;
+                    if (title.Contains("羽绒服") || title.Contains("裙") || title.Contains("裤")) return null;
                     var index = mainPriceText.IndexOf("元");
                     if (index == -1) return null;
                     try
@@ -157,16 +157,29 @@ namespace SmzdmBot
                     if (Helper.ToUrl(driver, it["smzdmGo"]))
                     {
                         var p = new Price();
+                        if (driver.Url.StartsWith("https://product.suning.com/") || driver.Url.StartsWith("http://product.suning.com/"))
+                        {
+                            p = SUNINGPriceParser.ExtractPrice(driver);
+                            if (p != null)
+                            {
+                                p.Calculate();
+                                if (p.finalPrice <= 0)
+                                {
+                                    Console.WriteLine("Fail to process SUNING item, Skip");
+                                    return null;
+                                }
+                            }
+                        }
                         p.SmzdmGoodPrice = double.Parse(it["smzdmOldPrice"]);
                         p.sourceUrl = driver.Url;
                         p.SmzdmItemTitle = it["smzdmItemTitle"];
                         p.SmzdmGoUrl = it["smzdmGo"];
-                        
+
                         Console.WriteLine("added " + p.sourceUrl + " " + p.SmzdmGoodPrice);
                         return p;
                     }
                 }
-                catch (NoSuchElementException e)
+                catch (NoSuchElementException)
                 {
                     Console.WriteLine("No Baike, drop " + it["smzdmProduct"]);
                 }
@@ -183,6 +196,19 @@ namespace SmzdmBot
                 if (Helper.ToUrl(driver, link))
                 {
                     var p = new Price();
+                    if (driver.Url.StartsWith("https://product.suning.com/") || driver.Url.StartsWith("http://product.suning.com/"))
+                    {
+                        p = SUNINGPriceParser.ExtractPrice(driver);
+                        if (p != null)
+                        {
+                            p.Calculate();
+                            if (p.finalPrice <= 0)
+                            {
+                                Console.WriteLine("Fail to process SUNING item, Skip");
+                                return null;
+                            }
+                        }
+                    }
                     p.SmzdmGoodPrice = it.SmzdmGoodPrice;
                     p.sourceUrl = driver.Url;
                     p.SmzdmItemTitle = it.SmzdmItemTitle;
@@ -383,16 +409,7 @@ namespace SmzdmBot
             if (url.Contains("product.suning.com"))
             {
                 driver.Navigate().GoToUrl(url);
-                var priceText = driver.FindElement(By.Id("priceDom")).Text;
-                var title = driver.FindElement(By.Id("itemDisplayName")).Text;
-                var storeInfo = driver.FindElement(By.ClassName("si-intro-list")).Text;
-                var storeName = SUNINGPriceParser.ParseShopName(storeInfo);
-                Console.WriteLine("store: " + storeName);
-                var price = ParsePrice(priceText, url);
-                price.sourceUrl = url;
-                price.storeName = storeName;
-                price.ItemName = title;
-                price.Calculate();
+                var price = SUNINGPriceParser.ExtractPrice(driver);
                 Console.WriteLine(JsonConvert.SerializeObject(price));
                 return price;
             }

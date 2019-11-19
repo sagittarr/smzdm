@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenQA.Selenium;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,6 +21,21 @@ namespace SmzdmBot
                 return lines[loc + 1];
             }
             return "";
+        }
+
+        public static Price ExtractPrice(IWebDriver driver)
+        {
+            var priceText = driver.FindElement(By.Id("priceDom")).Text;
+            var title = driver.FindElement(By.Id("itemDisplayName")).Text;
+            var storeInfo = driver.FindElement(By.ClassName("si-intro-list")).Text;
+            var storeName = SUNINGPriceParser.ParseShopName(storeInfo);
+            Console.WriteLine("store: " + storeName);
+            var price = Parse(priceText, driver.Url);
+            price.sourceUrl = driver.Url;
+            price.storeName = storeName;
+            price.ItemName = title;
+            price.Calculate();
+            return price;
         }
         public static Price Parse(string text, string url)
         {

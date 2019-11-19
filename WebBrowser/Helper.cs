@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -80,6 +81,12 @@ namespace SmzdmBot
                 inputList.RemoveAt(randomIndex); //remove to avoid duplicates
             }
             return randomList; //return the new random list
+        }
+        public static T RandomSelect<T>(List<T> list)
+        {
+            var random = new Random();
+            int index = random.Next(list.Count);
+            return list[index];
         }
         public static string ParseShoppingPlatform(string url)
         {
