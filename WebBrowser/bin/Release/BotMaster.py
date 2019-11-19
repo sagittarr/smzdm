@@ -55,7 +55,9 @@ else :
                 cmd = ["./SmzdmBot.exe", command, username, password, sourceUrl,'2','10','0','23','好价',outputPth]
                 print(cmd)
             elif command == "smzdm_share":
-                cmd = ["./SmzdmBot.exe", command, username, password, sourceUrl,'2','5','0','23','好价',outputPth, sys.argv[4]]
+                cmd = ["./SmzdmBot.exe", command, username, password, sourceUrl,'2','5','0','23','好价',outputPth, sys.argv[4], sys.argv[5]]
+            elif command == "wiki_share":
+                cmd = ["./SmzdmBot.exe", command, username, password, sourceUrl,'2','5','0','23','好价',outputPth, sys.argv[4], sys.argv[5]]
             elif command == "login":
                 cmd = ["./SmzdmBot.exe", command, username ,password, outputPth]
             else: 

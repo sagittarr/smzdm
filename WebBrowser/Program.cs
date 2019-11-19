@@ -65,10 +65,13 @@ namespace SmzdmBot
                 {
                     option = new Option(args.Skip(1).ToArray());
                     option.pageNumbers = args[10];
+                    if (args.Length >= 12) option.PriceRate = Double.Parse(args[11]);
                 }
-                else if(mode == "wiki")
+                else if(mode == "wiki_share")
                 {
                     option = new Option(args.Skip(1).ToArray());
+                    option.SmzdmWikiPages = args[10];
+                    if(args.Length>=12) option.PriceRate = Double.Parse(args[11]);
                 }
             }
             else
@@ -137,7 +140,7 @@ namespace SmzdmBot
                         var goodPrice = price.SmzdmGoodPrice;
                         var sourceUrl = price.sourceUrl;
                         var code = helper.PasteItemUrl(sourceUrl, 0, option.waitBaoliao, option.baoLiaoStopNumber);
-                        if (code == 1) helper.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, 1.12, 0.0);
+                        if (code == 1) helper.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, option.PriceRate, 0.0);
                         else if (code == 2)
                         {
                             break;
@@ -156,14 +159,18 @@ namespace SmzdmBot
                 }
                 return;
             }
-            else if(mode == "wiki")
+            else if(mode == "wiki_share")
             {
                 DealSearchBot bot = new DealSearchBot();
-                //Console.WriteLine(JsonConvert.SerializeObject(bot.GetLinkFromWiki(@"https://wiki.smzdm.com/p/jx7ew57/")));
-                //return;
                 var priceList = new List<Price>();
-                var itemUrls = bot.GetItemIdFromWikiPage("xiuxianyundongxie/b_757");
+                var pages = option.SmzdmWikiPages.Split(',');
+                var itemUrls = new List<string>();
+                foreach (var page in pages)
+                {
+                    itemUrls.AddRange(bot.GetItemIdFromWikiPage(page));
+                }
                 itemUrls = itemUrls.Distinct().ToList();
+
                 Console.WriteLine("Collected " + itemUrls.Count + " wiki items");
                 if (itemUrls!=null && itemUrls.Count > 0)
                 {
@@ -188,7 +195,7 @@ namespace SmzdmBot
                                 var goodPrice = price.SmzdmGoodPrice;
                                 var sourceUrl = price.sourceUrl;
                                 var code = helper.PasteItemUrl(sourceUrl, 0, option.waitBaoliao, option.baoLiaoStopNumber);
-                                if (code == 1) helper.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, 1.05, 0.0);
+                                if (code == 1) helper.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, option.PriceRate, 0.0);
                                 else if (code == 2)
                                 {
                                     break;

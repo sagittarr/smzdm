@@ -22,6 +22,8 @@ namespace SmzdmBot
         public int CrawlCount = 50;
         public string browser = "firefox";
         public string pageNumbers = "500,502,504";
+        public string SmzdmWikiPages { get; set; }
+        public double PriceRate = 1.1;
         public Option()
         {
 

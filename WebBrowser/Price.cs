@@ -37,6 +37,7 @@ namespace SmzdmBot
         public string SmzdmItemTitle { get; set; }
 
         public string SmzdmGoUrl { get; set; }
+
         public Price()
         {
             coupons = new List<List<double>>();
