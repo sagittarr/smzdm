@@ -108,7 +108,9 @@ namespace SmzdmBot
                 var end = int.Parse(pagesArr[1]);
                 for(int i = st; i<= end; i++)
                 {
-                    pages.Add("https://www.smzdm.com/jingxuan/p" + i.ToString() + "/");
+                    //"https://www.smzdm.com/jingxuan/p"
+                    
+                    pages.Add("https://www.smzdm.com/jingxuan/xuan/s0f163t0b0d0r0p" + i.ToString() + "/");
                 }
                 var helper = new SmzdmWorker(option);
                 if (!helper.Login())

@@ -191,9 +191,9 @@ namespace SmzdmBot
                         text = "目前"+source+"优惠价" + priceText;
                         break;
                     case 1:
-                        if (priceObject.storeName != null)
+                        if (priceObject!=null && priceObject.storeName != null)
                         {
-                            text = "目前优惠价" + priceText + ", 价格来自" + priceObject.storeName;
+                            text = "目前优惠价" + priceText + ", 价格来自" + source+" "+priceObject.storeName;
                         }
                         else
                         {
