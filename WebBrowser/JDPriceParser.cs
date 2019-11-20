@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenQA.Selenium;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,6 +27,10 @@ namespace SmzdmBot
         //        //File.AppendAllText(@"D:\test.txt", "~~~~~~~GoodPrice " + price.finalPrice + "\n");
         //    }
         //}
+        public static Price ExtractPrice(IWebDriver driver)
+        {
+            return null;
+        }
         public static Price Parse(string text, string url)
         {
             text = text.Replace("\r", "");

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SmzdmBot
@@ -139,7 +140,7 @@ namespace SmzdmBot
                     var it = new Dictionary<string, string>();
                     it.Add("smzdmProduct", itemSmzdmUrl);
                     it.Add("smzdmGo", goSmzdmUrl);
-                    it.Add("smzdmOldPrice", oldPrice.ToString());
+                    it.Add("smzdmGoodPrice", oldPrice.ToString());
                     it.Add("smzdmItemTitle", itemTitle);
                     return it;
                 }
@@ -156,27 +157,37 @@ namespace SmzdmBot
                     driver.FindElement(By.ClassName("new-baike-card"));
                     if (Helper.ToUrl(driver, it["smzdmGo"]))
                     {
-                        var p = new Price();
+                        var price = new Price();
                         if (driver.Url.StartsWith("https://product.suning.com/") || driver.Url.StartsWith("http://product.suning.com/"))
                         {
-                            p = SUNINGPriceParser.ExtractPrice(driver);
-                            if (p != null)
+                            price = SUNINGPriceParser.ExtractPrice(driver);
+                            if (price != null)
                             {
-                                p.Calculate();
-                                if (p.finalPrice <= 0)
+                                price.Calculate();
+                                if (price.finalPrice <= 0)
                                 {
                                     Console.WriteLine("Fail to process SUNING item, Skip");
                                     return null;
                                 }
                             }
                         }
-                        p.SmzdmGoodPrice = double.Parse(it["smzdmOldPrice"]);
-                        p.sourceUrl = driver.Url;
-                        p.SmzdmItemTitle = it["smzdmItemTitle"];
-                        p.SmzdmGoUrl = it["smzdmGo"];
+                        else if(driver.Url.StartsWith("https://re.jd.com/cps/item/") || driver.Url.StartsWith("http://re.jd.com/cps/item/"))
+                        {
+                            driver.FindElement(By.ClassName("gobuy")).Click();
+                            Console.WriteLine("Wait 5s for redirect from re.jd.com");
+                            Thread.Sleep(5000);
+                        }
+                        //if(driver.Url.StartsWith("https://item.jd.com/") || driver.Url.StartsWith("http://item.jd.com/"))
+                        //{
+                        //    price = JDPriceParser.ExtractPrice();
+                        //}
+                        price.SmzdmGoodPrice = double.Parse(it["smzdmGoodPrice"]);
+                        price.sourceUrl = driver.Url;
+                        price.SmzdmItemTitle = it["smzdmItemTitle"];
+                        price.SmzdmGoUrl = it["smzdmGo"];
 
-                        Console.WriteLine("added " + p.sourceUrl + " " + p.SmzdmGoodPrice);
-                        return p;
+                        Console.WriteLine("added " + price.sourceUrl + " " + price.SmzdmGoodPrice);
+                        return price;
                     }
                 }
                 catch (NoSuchElementException)
@@ -193,28 +204,38 @@ namespace SmzdmBot
             var list = new List<Price>();
             foreach (var link in it.SmzdmGoUrls)
             {
-                if (Helper.ToUrl(driver, link))
+                var dict = new Dictionary<string, string>();
+                dict.Add("smzdmProduct", it.SmzdmProductUrl);
+                dict.Add("smzdmItemTitle", it.SmzdmItemTitle);
+                dict.Add("smzdmGo", link);
+                dict.Add("smzdmGoodPrice", it.SmzdmGoodPrice.ToString());
+                var price = CheckSmzdmItem(dict);
+                if (price != null)
                 {
-                    var p = new Price();
-                    if (driver.Url.StartsWith("https://product.suning.com/") || driver.Url.StartsWith("http://product.suning.com/"))
-                    {
-                        p = SUNINGPriceParser.ExtractPrice(driver);
-                        if (p != null)
-                        {
-                            p.Calculate();
-                            if (p.finalPrice <= 0)
-                            {
-                                Console.WriteLine("Fail to process SUNING item, Skip");
-                                return null;
-                            }
-                        }
-                    }
-                    p.SmzdmGoodPrice = it.SmzdmGoodPrice;
-                    p.sourceUrl = driver.Url;
-                    p.SmzdmItemTitle = it.SmzdmItemTitle;
-                    p.SmzdmGoUrl = link;
-                    list.Add(p);
+                    list.Add(price);
                 }
+                //if (Helper.ToUrl(driver, link))
+                //{
+                //    var p = new Price();
+                //    if (driver.Url.StartsWith("https://product.suning.com/") || driver.Url.StartsWith("http://product.suning.com/"))
+                //    {
+                //        p = SUNINGPriceParser.ExtractPrice(driver);
+                //        if (p != null)
+                //        {
+                //            p.Calculate();
+                //            if (p.finalPrice <= 0)
+                //            {
+                //                Console.WriteLine("Fail to process SUNING item, Skip");
+                //                return null;
+                //            }
+                //        }
+                //    }
+                //    p.SmzdmGoodPrice = it.SmzdmGoodPrice;
+                //    p.sourceUrl = driver.Url;
+                //    p.SmzdmItemTitle = it.SmzdmItemTitle;
+                //    p.SmzdmGoUrl = link;
+                //    list.Add(p);
+                //}
             }
             return list;
         }
@@ -291,7 +312,7 @@ namespace SmzdmBot
                             var it = new Dictionary<string, string>();
                             it.Add("smzdmProduct", itemSmzdmUrl);
                             it.Add("smzdmGo", goSmzdmUrl);
-                            it.Add("smzdmOldPrice", oldPrice.ToString());
+                            it.Add("smzdmGoodPrice", oldPrice.ToString());
                             it.Add("smzdmItemTitle", itemTitle);
                             SmzdmList.Add(it);
                             break;
@@ -310,7 +331,7 @@ namespace SmzdmBot
                             if (Helper.ToUrl(driver, it["smzdmGo"]))
                             {
                                 var p = new Price();
-                                p.SmzdmGoodPrice = double.Parse(it["smzdmOldPrice"]);
+                                p.SmzdmGoodPrice = double.Parse(it["smzdmGoodPrice"]);
                                 p.sourceUrl = driver.Url;
                                 p.SmzdmItemTitle = it["smzdmItemTitle"];
                                 p.SmzdmGoUrl = it["smzdmGo"];
