@@ -77,6 +77,10 @@ namespace SmzdmBot
             Console.WriteLine("Type Y to continue, after human check.");
             if (Console.ReadLine().ToLower().Contains("y"))
             {
+                driver.Navigate().GoToUrl(@"https://www.smzdm.com/");
+                driver.FindElement(By.ClassName("J_punch")).Click();
+                Console.WriteLine("Check in punched.");
+                driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
                 return true;
             }
             return false;

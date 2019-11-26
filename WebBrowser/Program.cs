@@ -1,17 +1,9 @@
-﻿using HtmlAgilityPack;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Firefox;
-using OpenQA.Selenium.Support.UI;
-using SmzdmBot;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SmzdmBot
 {
@@ -64,8 +56,9 @@ namespace SmzdmBot
                 else if (mode == "smzdm_share")
                 {
                     option = new Option(args.Skip(1).ToArray());
-                    option.pageNumbers = args[10];
-                    if (args.Length >= 12) option.PriceRate = Double.Parse(args[11]);
+                    option.HotPickCategory = args[10];
+                    option.pageNumbers = args[11];
+                    option.PriceRate = Double.Parse(args[12]);
                 }
                 else if(mode == "wiki_share")
                 {
@@ -104,13 +97,12 @@ namespace SmzdmBot
 
                 var pages = new List<string>();
                 var pagesArr = option.pageNumbers.Split('-');
+                var pageCode = option.ConvertHotPickCategory(option.HotPickCategory);
                 var st = int.Parse(pagesArr[0]);
                 var end = int.Parse(pagesArr[1]);
                 for(int i = st; i<= end; i++)
                 {
-                    //"https://www.smzdm.com/jingxuan/p"
-                    
-                    pages.Add("https://www.smzdm.com/jingxuan/xuan/s0f163t0b0d0r0p" + i.ToString() + "/");
+                    pages.Add("https://www.smzdm.com/jingxuan/xuan/"+ pageCode + i.ToString() + "/");
                 }
                 var helper = new SmzdmWorker(option);
                 if (!helper.Login())
@@ -133,7 +125,7 @@ namespace SmzdmBot
 
                     }
                 }
-                Console.WriteLine("Potential good price count " + smzdmItemList.Count);
+                Console.WriteLine("Collected good price count " + smzdmItemList.Count);
                 foreach (var it in smzdmItemList)
                 {
                     var price = bot.CheckSmzdmItem(it);
@@ -183,16 +175,16 @@ namespace SmzdmBot
                     }
                     foreach (var itemUrl in itemUrls)
                     {
-                        var prices = bot.CheckSmzdmItem(bot.GetLinkFromWiki(itemUrl));
-                        if (prices == null) continue;
-                        if (prices.Count > 1)
-                        {
-                            prices = prices.Take(2).ToList();
-                        }
-                        foreach (var price in prices)
-                        {
-                            if (price != null)
-                            {
+                        var price = bot.CheckSmzdmItem(bot.GetLinkFromWiki(itemUrl));
+                        if (price == null) continue;
+                        //if (prices.Count > 1)
+                        //{
+                        //    prices = prices.Take(2).ToList();
+                        //}
+                        //foreach (var price in prices)
+                        //{
+                            //if (price != null)
+                            //{
                                 Console.WriteLine("Process " + JsonConvert.SerializeObject(price));
                                 var goodPrice = price.SmzdmGoodPrice;
                                 var sourceUrl = price.sourceUrl;
@@ -202,8 +194,8 @@ namespace SmzdmBot
                                 {
                                     break;
                                 }
-                            }
-                        }
+                            //}
+                        //}
                     }
                     Console.WriteLine("Finished.");
                     helper.OutputStatus();

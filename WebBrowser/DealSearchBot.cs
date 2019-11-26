@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Office.Interop.Excel;
+using Newtonsoft.Json;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
@@ -38,7 +39,7 @@ namespace SmzdmBot
             }
             return itemUrls;
         }
-        public SmzdmWiki GetLinkFromWiki(string wikiUrl)
+        public Dictionary<string, string> GetLinkFromWiki(string wikiUrl)
         {
             if (wikiUrl == null) return null;
             
@@ -49,32 +50,61 @@ namespace SmzdmBot
                 {
                     var title = driver.FindElement(By.ClassName("pd-title")).Text; 
                     var mainPriceText = driver.FindElement(By.ClassName("sku-pd-price")).Text;
+                    var lastSharePriceText = driver.FindElement(By.ClassName("z-highlight")).Text;
                     var mainPrice = 0.0;
+                    var lastSharePrice = 0.0;
                     if (title.Contains("羽绒服") || title.Contains("裙") || title.Contains("裤")) return null;
-                    var index = mainPriceText.IndexOf("元");
+                    //var index = mainPriceText.IndexOf("元");
+                    var index = lastSharePriceText.IndexOf("元");
                     if (index == -1) return null;
                     try
                     {
-                        mainPrice = double.Parse(mainPriceText.Substring(0, index));
+                        //mainPrice = double.Parse(mainPriceText.Substring(0, index));
+                        //Console.WriteLine("main price " + mainPrice);
+                        lastSharePrice = double.Parse(lastSharePriceText.Substring(0, index));
+                        Console.WriteLine("lastSharePrice " + lastSharePrice);
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        Console.WriteLine(e.Message);
                         return null;
                     }
-                    var malls = driver.FindElements(By.ClassName("mall-price")).ToList();
-                    foreach(IWebElement element in malls)
+                    var zButton = driver.FindElement(By.ClassName("feed-link-btn-inner"));
+                    var goLink = "";
+                    var link = zButton.FindElement(By.TagName("a")).GetAttribute("href");
+                    if (link.StartsWith("https://go.smzdm.com/"))
                     {
-                        var href = element.GetAttribute("href");
-                        if (href.StartsWith("https://go.smzdm.com/"))
-                        {
-                            linkList.Add(href);
-                        }
+                        goLink = link;
                     }
-                    var wiki = new SmzdmWiki();
-                    wiki.SmzdmGoUrls.AddRange(linkList);
-                    wiki.SmzdmGoodPrice = mainPrice;
-                    wiki.SmzdmItemTitle = title;
-                    return wiki;
+
+                    var feedFirst = driver.FindElement(By.ClassName("feed-block-title"));
+                    var itemLink = "";
+                    link = "";
+                    link = feedFirst.FindElement(By.TagName("a")).GetAttribute("href");
+                    if (link.StartsWith("https://www.smzdm.com/p/"))
+                    {
+                        itemLink = link;
+                    }
+                    //var malls = driver.FindElements(By.ClassName("mall-price")).ToList();
+                    //foreach(IWebElement element in malls)
+                    //{
+                    //    var href = element.GetAttribute("href");
+                    //    if (href.StartsWith("https://go.smzdm.com/"))
+                    //    {
+                    //        linkList.Add(href);
+                    //    }
+                    //}
+                    //var wiki = new SmzdmWiki();
+                    //wiki.SmzdmGoUrls.AddRange(linkList);
+                    //wiki.SmzdmGoodPrice = lastSharePrice;
+                    //wiki.SmzdmItemTitle = title;
+                    var it = new Dictionary<string, string>();
+                    it.Add("smzdmProduct", itemLink);
+                    it.Add("smzdmGo", goLink);
+                    it.Add("smzdmGoodPrice", lastSharePrice.ToString());
+                    it.Add("smzdmItemTitle", title);
+                    Console.WriteLine(JsonConvert.SerializeObject(it));
+                    return it;
                 }
                 catch (NoSuchElementException)
                 {
@@ -152,11 +182,13 @@ namespace SmzdmBot
             if (it == null) return null;
             if (Helper.ToUrl(driver, it["smzdmProduct"]))
             {
+                Console.WriteLine(driver.Url);
                 try
                 {
                     driver.FindElement(By.ClassName("new-baike-card"));
                     if (Helper.ToUrl(driver, it["smzdmGo"]))
                     {
+                        Console.WriteLine(driver.Url);
                         var price = new Price();
                         if (driver.Url.StartsWith("https://product.suning.com/") || driver.Url.StartsWith("http://product.suning.com/"))
                         {
@@ -190,55 +222,33 @@ namespace SmzdmBot
                         return price;
                     }
                 }
-                catch (NoSuchElementException)
+                catch (NoSuchElementException e)
                 {
-                    Console.WriteLine("No Baike, drop " + it["smzdmProduct"]);
+                    Console.WriteLine(e.Message);
                 }
             }
             return null;
         }
 
-        public List<Price> CheckSmzdmItem(SmzdmWiki it)
-        {
-            if (it == null) return null;
-            var list = new List<Price>();
-            foreach (var link in it.SmzdmGoUrls)
-            {
-                var dict = new Dictionary<string, string>();
-                dict.Add("smzdmProduct", it.SmzdmProductUrl);
-                dict.Add("smzdmItemTitle", it.SmzdmItemTitle);
-                dict.Add("smzdmGo", link);
-                dict.Add("smzdmGoodPrice", it.SmzdmGoodPrice.ToString());
-                var price = CheckSmzdmItem(dict);
-                if (price != null)
-                {
-                    list.Add(price);
-                }
-                //if (Helper.ToUrl(driver, link))
-                //{
-                //    var p = new Price();
-                //    if (driver.Url.StartsWith("https://product.suning.com/") || driver.Url.StartsWith("http://product.suning.com/"))
-                //    {
-                //        p = SUNINGPriceParser.ExtractPrice(driver);
-                //        if (p != null)
-                //        {
-                //            p.Calculate();
-                //            if (p.finalPrice <= 0)
-                //            {
-                //                Console.WriteLine("Fail to process SUNING item, Skip");
-                //                return null;
-                //            }
-                //        }
-                //    }
-                //    p.SmzdmGoodPrice = it.SmzdmGoodPrice;
-                //    p.sourceUrl = driver.Url;
-                //    p.SmzdmItemTitle = it.SmzdmItemTitle;
-                //    p.SmzdmGoUrl = link;
-                //    list.Add(p);
-                //}
-            }
-            return list;
-        }
+        //public List<Price> CheckSmzdmItemFromWiki(Dictionary<string, string> it)
+        //{
+        //    if (it == null) return null;
+        //    var list = new List<Price>();
+        //    foreach (var link in it.SmzdmGoUrls)
+        //    {
+        //        var dict = new Dictionary<string, string>();
+        //        dict.Add("smzdmProduct", it.SmzdmProductUrl);
+        //        dict.Add("smzdmItemTitle", it.SmzdmItemTitle);
+        //        dict.Add("smzdmGo", link);
+        //        dict.Add("smzdmGoodPrice", it.SmzdmGoodPrice.ToString());
+        //        var price = CheckSmzdmItem(dict);
+        //        if (price != null)
+        //        {
+        //            list.Add(price);
+        //        }
+        //    }
+        //    return list;
+        //}
         public List<Price> GetSmzdmItems(Option option)
         {
             var deals = new List<Price>();

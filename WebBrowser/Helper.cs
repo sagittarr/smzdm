@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,8 +24,10 @@ namespace SmzdmBot
         public int CrawlCount = 50;
         public string browser = "firefox";
         public string pageNumbers = "500,502,504";
+        public string HotPickCategory = "";
         public string SmzdmWikiPages { get; set; }
         public double PriceRate = 1.1;
+        private static Dictionary<string, string>  HotPickCategoryMap = new Dictionary<string, string>();
         public Option()
         {
 
@@ -40,6 +43,19 @@ namespace SmzdmBot
             baoLiaoStopNumber = int.Parse(args[6]);
             CustomDescriptionPrefix = args[7];
             output = args[8];
+        }
+        public string ConvertHotPickCategory(string name)
+        {
+            if(HotPickCategoryMap.Count == 0)
+            {
+                HotPickCategoryMap.Add("computers", "s0f163t0b0d0r0p");
+                HotPickCategoryMap.Add("ele", "s0f27t0b0d0r0p");
+                HotPickCategoryMap.Add("sports", "s0f191t0b0d0r0p");
+                HotPickCategoryMap.Add("beauty", "s0f113t0b0d0r0p");
+                HotPickCategoryMap.Add("mother", "s0f75t0b0d0r0p");
+                HotPickCategoryMap.Add("home", "s0f37t0b0d0r0p");
+            }
+            return HotPickCategoryMap[name];
         }
     }
     public class Helper
