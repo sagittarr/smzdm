@@ -67,6 +67,7 @@ namespace SmzdmBot
             driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
             driver.Navigate().Refresh();
             driver.FindElement(By.Id("username")).SendKeys(option.username); //"18604568194" smzdm24202@outlook.com
+            driver.FindElement(By.Id("password")).Click();
             driver.FindElement(By.Id("password")).SendKeys(option.password);
 
             var login = driver.FindElement(By.Id("login_submit"));
@@ -122,6 +123,8 @@ namespace SmzdmBot
                     Console.WriteLine("price is not good " + currentPrice + " " + oldPrice);
                     return true;
                 }
+                driver.FindElement(By.Id("un-content-price")).Click();
+                Thread.Sleep(500);
                 var desp = driver.FindElement(By.Id("un-content-price"));
                 if (desp != null)
                 {
