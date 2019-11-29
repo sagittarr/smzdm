@@ -99,7 +99,11 @@ namespace SmzdmBot
                 var pagesArr = option.pageNumbers.Split('-');
                 var pageCode = option.ConvertHotPickCategory(option.HotPickCategory);
                 var st = int.Parse(pagesArr[0]);
-                var end = int.Parse(pagesArr[1]);
+                var end = st;
+                if (pagesArr.Length > 1)
+                {
+                    end = int.Parse(pagesArr[1]);
+                }
                 for(int i = st; i<= end; i++)
                 {
                     pages.Add("https://www.smzdm.com/jingxuan/xuan/"+ pageCode + i.ToString() + "/");
@@ -141,6 +145,7 @@ namespace SmzdmBot
                         }
                     }
                 }
+                helper.Like();
                 Console.WriteLine("Finished.");
                 helper.OutputStatus();
                 if (helper.gold > 1)
