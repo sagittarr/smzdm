@@ -54,6 +54,7 @@ namespace SmzdmBot
                 HotPickCategoryMap.Add("beauty", "s0f113t0b0d0r0p");
                 HotPickCategoryMap.Add("mother", "s0f75t0b0d0r0p");
                 HotPickCategoryMap.Add("home", "s0f37t0b0d0r0p");
+                HotPickCategoryMap.Add("things","s0f1515t0b0d0r0p");
             }
             return HotPickCategoryMap[name];
         }
