@@ -2,6 +2,7 @@
 using OpenQA.Selenium.Firefox;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -248,6 +249,61 @@ namespace SmzdmBot
             }
             return text;
         }
+
+        public void Like(string Id= "2825621472")
+        {
+            var url = @"https://zhiyou.smzdm.com/member/"+Id+"/friendships/followers/";
+            driver.Navigate().GoToUrl(url);
+            var friends = driver.FindElements(By.ClassName("user-avatar")).ToList();
+            var links = new List<string>();
+            foreach(var element in friends)
+            {
+                var link = element.GetAttribute("href");
+                if (link.StartsWith("https://zhiyou.smzdm.com/member/"))
+                {
+                    links.Add(link);
+                }
+            }
+            Console.WriteLine("total "+links.Count + " friends");
+            foreach(var link in links)
+            {
+                driver.Navigate().GoToUrl(link+ "baoliao/");
+                var items = driver.FindElements(By.ClassName("pandect-content-stuff")).ToList();
+                var itemLinkList = new List<string>();
+                foreach (var item in items)
+                {
+                    var timeStamp = item.FindElement(By.ClassName("pandect-content-time")).Text;
+                    if(timeStamp.Contains("前") || timeStamp.Contains("刚"))
+                    {
+                        var itemLink = item.FindElement(By.TagName("a")).GetAttribute("href");
+                        if (itemLink.StartsWith("https://www.smzdm.com/p/"))
+                        {
+                            itemLinkList.Add(itemLink);
+                        }
+                    }
+                    else if (timeStamp.Contains("-"))
+                    {
+                        var today = DateTime.Today;
+                        CultureInfo provider = CultureInfo.InvariantCulture;
+                        Console.WriteLine("'" + timeStamp + "'");
+                        DateTime date = DateTime.ParseExact(timeStamp.Split(' ')[0], "mm-dd", provider);
+                        var diff = (today - date).Days;
+                        Console.WriteLine(today.Day + " " + date.Day + " " + diff);
+                    }
+                }
+                foreach(var itemLink in itemLinkList)
+                {
+                    driver.Navigate().GoToUrl(itemLink);
+                    var worth = driver.FindElement(By.Id("rating_worthy_num")).Text;
+                    var unWorth = driver.FindElement(By.Id("rating_unworthy_num")).Text;
+                    
+                    Console.WriteLine(worth + ":" + unWorth);
+                    var marks = driver.FindElement(By.ClassName("icon-star-o")).Text;
+                    Console.WriteLine(marks);
+                }
+                break;
+            }
+        }
         private bool CheckFrequecyNotice()
         {
             var fails = driver.FindElements(By.ClassName("layerSubInfo"));
@@ -379,7 +435,7 @@ namespace SmzdmBot
             return 0; // next item
         }
 
-        public string getStatus()
+        private string getStatus()
         {
             driver.Navigate().GoToUrl("https://zhiyou.smzdm.com/user/");
             nickName = driver.FindElement(By.ClassName("info-stuff-nickname")).Text;
