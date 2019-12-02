@@ -98,9 +98,10 @@ namespace SmzdmBot
             var type2 = driver.FindElement(By.Id("search_type_two")).Text;
             var type3 = driver.FindElement(By.Id("search_type_three")).Text;
             var type4 = driver.FindElement(By.Id("search_type_four")).Text;
-
+            var currency = driver.FindElement(By.Id("money_unit")).Text;
             if (!String.IsNullOrWhiteSpace(priceText) && !String.IsNullOrWhiteSpace(name) && !String.IsNullOrWhiteSpace(name))
             {
+
                 Console.WriteLine("current category is " + type1 + " "+ type2 + " "+ type3 + " "+ type4);
                 if (type1 != null && type1.Contains("服饰鞋包"))
                 {
@@ -108,6 +109,8 @@ namespace SmzdmBot
                     return true;
                 }
                 var currentPrice = double.Parse(priceText);
+                priceText += currency;
+                Console.WriteLine(priceText);
                 if (rate1>0.0 && smzdmGoodPrice > 0 && currentPrice > smzdmGoodPrice * rate1)
                 {
                     Console.WriteLine("price is not good " + currentPrice + " " + smzdmGoodPrice);
@@ -133,7 +136,7 @@ namespace SmzdmBot
                     
                     if (despMode == 1)
                     {
-                        desp.SendKeys("预计到手价" + priceText + "!");
+                        desp.SendKeys("预计到手价" + priceText +"!");
                     }
                     else if (despMode == 0)
                     { 
