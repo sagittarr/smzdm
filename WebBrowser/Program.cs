@@ -93,70 +93,71 @@ namespace SmzdmBot
             }
             else if (mode == "smzdm_share")
             {
-                //DealSearchBot bot = new DealSearchBot();
-               
-                //var pages = new List<string>();
-                //var pagesArr = option.pageNumbers.Split('-');
-                //var pageCode = option.ConvertHotPickCategory(option.HotPickCategory);
-                //var st = int.Parse(pagesArr[0]);
-                //var end = st;
-                //if (pagesArr.Length > 1)
-                //{
-                //    end = int.Parse(pagesArr[1]);
-                //}
-                //for(int i = st; i<= end; i++)
-                //{
-                //    pages.Add("https://www.smzdm.com/jingxuan/xuan/"+ pageCode + i.ToString() + "/");
-                //}
+                DealSearchBot bot = new DealSearchBot();
+
+                var pages = new List<string>();
+                var pagesArr = option.pageNumbers.Split('-');
+                var pageCode = option.ConvertHotPickCategory(option.HotPickCategory);
+                var st = int.Parse(pagesArr[0]);
+                var end = st;
+                if (pagesArr.Length > 1)
+                {
+                    end = int.Parse(pagesArr[1]);
+                }
+                for (int i = st; i <= end; i++)
+                {
+                    pages.Add("https://www.smzdm.com/jingxuan/xuan/" + pageCode + i.ToString() + "/");
+                }
                 var helper = new SmzdmWorker(option);
                 if (!helper.Login())
                 {
                     return;
                 }
-                helper.TransferGold("https://post.smzdm.com/p/amm539rz/");
-                //var smzdmItemList = new List<Dictionary<string, string>>();
-                //foreach (var page in pages)
-                //{
-                //    bot.driver.Navigate().GoToUrl(page);
-                //    var items = bot.driver.FindElements(By.ClassName("z-feed-content")).ToList();
-                    
-                //    foreach(IWebElement item in items)
-                //    {
-                //        var it = bot.GetSmzdmItem(item);
-                //        if (it != null)
-                //        {
-                //            smzdmItemList.Add(it);
-                //        }
 
-                //    }
-                //}
-                //Console.WriteLine("Collected good price count " + smzdmItemList.Count);
-                //foreach (var it in smzdmItemList)
-                //{
-                //    var price = bot.CheckSmzdmItem(it);
-                //    if (price != null)
-                //    {
-                //        var goodPrice = price.SmzdmGoodPrice;
-                //        var sourceUrl = price.sourceUrl;
-                //        var code = helper.PasteItemUrl(sourceUrl, 0, option.waitBaoliao, option.baoLiaoStopNumber);
-                //        if (code == 1) helper.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, option.PriceRate, 0.0);
-                //        else if (code == 2)
-                //        {
-                //            break;
-                //        }
-                //    }
-                //}
+                var smzdmItemList = new List<Dictionary<string, string>>();
+                foreach (var page in pages)
+                {
+                    bot.driver.Navigate().GoToUrl(page);
+                    var items = bot.driver.FindElements(By.ClassName("z-feed-content")).ToList();
+
+                    foreach (IWebElement item in items)
+                    {
+                        var it = bot.GetSmzdmItem(item);
+                        if (it != null)
+                        {
+                            smzdmItemList.Add(it);
+                        }
+
+                    }
+                }
+                Console.WriteLine("Collected good price count " + smzdmItemList.Count);
+                foreach (var it in smzdmItemList)
+                {
+                    var price = bot.CheckSmzdmItem(it);
+                    if (price != null)
+                    {
+                        var goodPrice = price.SmzdmGoodPrice;
+                        var sourceUrl = price.sourceUrl;
+                        var code = helper.PasteItemUrl(sourceUrl, 0, option.waitBaoliao, option.baoLiaoStopNumber);
+                        if (code == 1) helper.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, option.PriceRate, 0.0);
+                        else if (code == 2)
+                        {
+                            break;
+                        }
+                    }
+                }
                 //helper.Like();
-                //Console.WriteLine("Finished.");
-                //helper.OutputStatus();
-                //if (helper.gold > 1)
-                //{
-                //    Console.WriteLine(option.username + " gold=" + helper.gold);
-                //}
-                //else
-                //{
-                //    helper.Shutdown();
-                //}
+                Console.WriteLine("Finished.");
+                helper.OutputStatus();
+                if (helper.gold > 1)
+                {
+                    Console.WriteLine(option.username + " gold=" + helper.gold);
+                    //helper.TransferGold("https://post.smzdm.com/p/amm539rz/");
+                }
+                else
+                {
+                    helper.Shutdown();
+                }
                 return;
             }
             else if(mode == "wiki_share")

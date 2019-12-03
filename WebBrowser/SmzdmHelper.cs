@@ -2,6 +2,7 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -25,8 +26,8 @@ namespace SmzdmBot
         public IWebDriver driver;
         public SmzdmWorker(Option opt)
         {
-            driver = new FirefoxDriver();
-            //driver = new ChromeDriver();
+            //driver = new FirefoxDriver();
+            driver = new ChromeDriver();
             option = opt;
         }
 
@@ -269,77 +270,103 @@ namespace SmzdmBot
                     break;
                 }
             }
-            Console.WriteLine("n "+num);
             return int.Parse(num);
         }
         public  void ScrollIntoView(IWebElement ele)
         {
             ((IJavaScriptExecutor)driver).ExecuteScript("window.scrollTo(" + ele.Location.X + "," + ele.Location.Y + ")");
         }
-        public void TransferGold(string url)
+        private void Pay(int gold)
         {
-            driver.Navigate().GoToUrl(url);
-
-            var feed = driver.FindElement(By.Id("feed-side"));
-            var spans = feed.FindElements(By.TagName("span"));
-            foreach(var span in spans)
+            var gratuityProcess = driver.FindElement(By.ClassName("gratuity-process"));
+            var inputs = gratuityProcess.FindElements(By.ClassName("custom"));
+            Console.WriteLine("c" + inputs.Count);
+            foreach (var p in inputs)
             {
-                if(span.Text == "打赏")
+                try
                 {
-                    span.Click();
+                    p.Click();
+                    Thread.Sleep(1000);
+                    p.SendKeys(gold.ToString());
+                }
+                catch (ElementNotInteractableException)
+                {
                 }
             }
             Thread.Sleep(1000);
-            //transferButton.Click();
-            //Console.WriteLine(transferButton.Text);
-            //var jubao = driver.FindElement(By.ClassName("pop_jubao"));
-            //Console.WriteLine(jubao.Text);
-            //Thread.Sleep(5000);
-            driver.FindElement(By.Id("gold")).Click();
-            Console.WriteLine("Gold clicked");
-            var gratuity = driver.FindElement(By.ClassName("gratuity-option"));
-            var labels = gratuity.FindElements(By.TagName("label"));
-            var silver = -1;
-            var gold = 0;
-            foreach(var l in labels)
+            var element = driver.FindElement(By.ClassName("pop-interval-30"));
+            var btns = element.FindElements(By.TagName("a"));
+            var payClicked = false;
+            foreach (var btn in btns)
             {
-                if(silver == -1)
+                if (btn.Text.Contains("打") && btn.Text.Contains("赏") && btn.GetAttribute("href") == "javascript:void(0)")
                 {
-                    silver = GetNumber(l.Text);
+                    btn.Click();
+                    payClicked = true;
+                    Console.WriteLine("pay clicked");
+                }
+            }
+            if (payClicked)
+            {
+                Thread.Sleep(1000);
+                foreach (var btn in btns)
+                {
+                    if (btn.Text.Contains("确") && btn.Text.Contains("认") && btn.GetAttribute("href") == "javascript:void(0)")
+                    {
+                        btn.Click();
+                        Console.WriteLine("confirm clicked");
+                    }
+                }
+            }
+        }
+        public void TransferGold(string url)
+        {
+            driver.Navigate().GoToUrl(url);
+            var count = 0;
+            while (count<=4)
+            {
+                count++;
+                var feed = driver.FindElement(By.Id("feed-side"));
+                var spans = feed.FindElements(By.TagName("span"));
+                foreach (var span in spans)
+                {
+                    if (span.Text == "打赏")
+                    {
+                        span.Click();
+                    }
+                }
+                Thread.Sleep(1000);
+                var gratuity = driver.FindElement(By.ClassName("gratuity-option"));
+                var labels = gratuity.FindElements(By.TagName("label"));
+                var silver = -1;
+                var gold = 0;
+                foreach (var l in labels)
+                {
+                    if (silver == -1)
+                    {
+                        silver = GetNumber(l.Text);
+                    }
+                    else
+                    {
+                        gold = GetNumber(l.Text);
+                    }
+
+                }
+                Console.WriteLine(silver);
+                Console.WriteLine(gold);
+
+                if (gold > 5)
+                {
+                    driver.FindElement(By.Id("gold")).Click();
+                    Console.WriteLine("Gold Selected");
+                    var amount = gold >= 49 ? 49 : gold;
+                    Thread.Sleep(1000);
+                    Pay(amount);
+                    Thread.Sleep(2000);
                 }
                 else
                 {
-                    gold = GetNumber(l.Text);
-                }
-                
-            }
-            Console.WriteLine(silver);
-            Console.WriteLine(gold);
-            if (gold > 5)
-            {
-                var pay = gold > 50 ? 50 : gold;
-                Thread.Sleep(1000);
-                //driver.SwitchTo().Frame(driver.FindElement(By.ClassName("custom")));
-                driver.FindElement(By.ClassName("custom")).Click();
-                Thread.Sleep(1000);
-                driver.FindElement(By.ClassName("custom")).SendKeys(pay.ToString());
-                Thread.Sleep(1000);
-                var btns = gratuity.FindElements(By.TagName("a"));
-                foreach(var btn in btns)
-                {
-                    if(btn.Text == "打  赏")
-                    {
-                        btn.Click();
-                        Thread.Sleep(1000);
-                    }
-                }
-                foreach (var btn in btns)
-                {
-                    if (btn.Text == "确  认")
-                    {
-                        btn.Click();
-                        Thread.Sleep(1000);
-                    }
+                    break;
                 }
             }
             //Console.WriteLine("Gold Left " + goldText);
