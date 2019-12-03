@@ -1,11 +1,14 @@
 ﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.Interactions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,6 +26,7 @@ namespace SmzdmBot
         public SmzdmWorker(Option opt)
         {
             driver = new FirefoxDriver();
+            //driver = new ChromeDriver();
             option = opt;
         }
 
@@ -249,7 +253,97 @@ namespace SmzdmBot
             }
             return text;
         }
+        private int GetNumber(string input)
+        {
+            bool start = false;
+            var num = "";
+            for(var i=0; i<input.Length; i++)
+            {
+                if (Char.IsDigit(input[i]))
+                {
+                    num += input[i];
+                    start = true;
+                }
+                else if(start == true)
+                {
+                    break;
+                }
+            }
+            Console.WriteLine("n "+num);
+            return int.Parse(num);
+        }
+        public  void ScrollIntoView(IWebElement ele)
+        {
+            ((IJavaScriptExecutor)driver).ExecuteScript("window.scrollTo(" + ele.Location.X + "," + ele.Location.Y + ")");
+        }
+        public void TransferGold(string url)
+        {
+            driver.Navigate().GoToUrl(url);
 
+            var feed = driver.FindElement(By.Id("feed-side"));
+            var spans = feed.FindElements(By.TagName("span"));
+            foreach(var span in spans)
+            {
+                if(span.Text == "打赏")
+                {
+                    span.Click();
+                }
+            }
+            Thread.Sleep(1000);
+            //transferButton.Click();
+            //Console.WriteLine(transferButton.Text);
+            //var jubao = driver.FindElement(By.ClassName("pop_jubao"));
+            //Console.WriteLine(jubao.Text);
+            //Thread.Sleep(5000);
+            driver.FindElement(By.Id("gold")).Click();
+            Console.WriteLine("Gold clicked");
+            var gratuity = driver.FindElement(By.ClassName("gratuity-option"));
+            var labels = gratuity.FindElements(By.TagName("label"));
+            var silver = -1;
+            var gold = 0;
+            foreach(var l in labels)
+            {
+                if(silver == -1)
+                {
+                    silver = GetNumber(l.Text);
+                }
+                else
+                {
+                    gold = GetNumber(l.Text);
+                }
+                
+            }
+            Console.WriteLine(silver);
+            Console.WriteLine(gold);
+            if (gold > 5)
+            {
+                var pay = gold > 50 ? 50 : gold;
+                Thread.Sleep(1000);
+                //driver.SwitchTo().Frame(driver.FindElement(By.ClassName("custom")));
+                driver.FindElement(By.ClassName("custom")).Click();
+                Thread.Sleep(1000);
+                driver.FindElement(By.ClassName("custom")).SendKeys(pay.ToString());
+                Thread.Sleep(1000);
+                var btns = gratuity.FindElements(By.TagName("a"));
+                foreach(var btn in btns)
+                {
+                    if(btn.Text == "打  赏")
+                    {
+                        btn.Click();
+                        Thread.Sleep(1000);
+                    }
+                }
+                foreach (var btn in btns)
+                {
+                    if (btn.Text == "确  认")
+                    {
+                        btn.Click();
+                        Thread.Sleep(1000);
+                    }
+                }
+            }
+            //Console.WriteLine("Gold Left " + goldText);
+        }
         public void Like(string Id= "2825621472")
         {
             var url = @"https://zhiyou.smzdm.com/member/"+Id+"/friendships/followers/";
@@ -298,11 +392,45 @@ namespace SmzdmBot
                     var unWorth = driver.FindElement(By.Id("rating_unworthy_num")).Text;
                     
                     Console.WriteLine(worth + ":" + unWorth);
-                    var marks = driver.FindElement(By.ClassName("icon-star-o")).Text;
-                    Console.WriteLine(marks);
+                    var worthV = double.Parse(worth);
+                    var unWorthV = double.Parse(unWorth);
+                    
+                    if (worthV<=3 || (unWorthV>0 && worthV / (worthV+unWorthV) <= 0.6))
+                    {
+                        driver.FindElement(By.Id("rating_worthy_num")).Click();
+                        Console.WriteLine("Worth Clicked");
+                    }
+                    var counter = GetFaverCount(driver);
+                    if (counter !=null)
+                    {
+                        var mark = driver.FindElement(By.ClassName("icon-star-o"));
+                        mark.Click();
+                        var count = int.Parse(counter.Text);
+                        Console.WriteLine("Current Favor Count " + count);
+                        var newCount = int.Parse(counter.Text);
+                        if (newCount < count)
+                        {
+                            Console.WriteLine("Current Favor Count " + newCount);
+                            mark.Click();
+                            Console.WriteLine("Current Favor Count " + int.Parse(counter.Text));
+                        }
+                    }
                 }
                 break;
             }
+        }
+        private IWebElement GetFaverCount(IWebDriver driver)
+        {
+            var divs = driver.FindElements(By.TagName("div"));
+            foreach (var div in divs)
+            {
+                var divTitle = div.GetAttribute("title");
+                if (divTitle == "收藏")
+                {
+                    return div.FindElement(By.TagName("span"));
+                }
+            }
+            return null;
         }
         private bool CheckFrequecyNotice()
         {
