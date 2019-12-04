@@ -71,17 +71,20 @@ namespace SmzdmBot
         }
         static void Main(string[] args)
         {
-            string mode = "";
-            var accounts = ExcelManager.Load(@"D:\GitHub\smzdm\WebBrowser\bin\Release\data\smzdm.xlsx");
-            //Console.WriteLine(JsonConvert.SerializeObject(accounts));
-            //Console.ReadKey();
-            //RunTasks();
-            //Console.ReadKey();
-            var account = accounts[0];
-            var option = new Option(account);
-            mode = account.mode;
-            //var option = BuildOption(args[0], args);
-
+            string mode = args[0];
+            Option option = BuildOption(mode, args);
+            //if(args[0] == "-a")
+            //{
+            //    Console.WriteLine(JsonConvert.SerializeObject(args[1].Trim('"')));
+            //    Console.ReadKey();
+            //    var account = JsonConvert.DeserializeObject<Account>(args[1].Trim('"'));
+            //    option = new Option(account);
+            //}
+            //else
+            //{
+            //    return;
+            //}
+            
             Console.WriteLine(JsonConvert.SerializeObject(option));
             //Console.ReadKey();
             Console.OutputEncoding = System.Text.Encoding.UTF8;
