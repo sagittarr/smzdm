@@ -89,16 +89,49 @@ namespace SmzdmBot
             {
                 login.Click();
             }
-            Console.WriteLine("Type Y to continue, after human check.");
-            if (Console.ReadLine().ToLower().Contains("y"))
+            int counter = 100;
+            bool logined = false;
+            while (counter > 0)
+            {
+                counter--;
+                Console.Write(".");
+                Thread.Sleep(3000);
+                try
+                {
+                    driver.FindElement(By.Id("get_info_btn"));
+                    logined = true;
+                    Console.WriteLine("Login Successfully");
+                    break;
+
+                }
+                catch (NoSuchElementException)
+                {
+
+                }
+            }
+            if (logined)
             {
                 driver.Navigate().GoToUrl(@"https://www.smzdm.com/");
                 driver.FindElement(By.ClassName("J_punch")).Click();
-                Console.WriteLine("Check in punched.");
+                Console.WriteLine("Check-in punched.");
                 driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
                 return true;
             }
-            return false;
+            else
+            {
+                Console.WriteLine("Login timeout");
+                return false;
+            }
+            //Console.WriteLine("Type Y to continue, after human check.");
+            //if (Console.ReadLine().ToLower().Contains("y"))
+            //{
+            //    driver.Navigate().GoToUrl(@"https://www.smzdm.com/");
+            //    driver.FindElement(By.ClassName("J_punch")).Click();
+            //    Console.WriteLine("Check in punched.");
+            //    driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
+            //    return true;
+            //}
+           
         }
 
 
@@ -331,7 +364,8 @@ namespace SmzdmBot
         {
             driver.Navigate().GoToUrl(url);
             var count = 0;
-            while (count<=4)
+            //security-input
+            while (count<4)
             {
                 count++;
                 var feed = driver.FindElement(By.Id("feed-side"));
@@ -370,7 +404,7 @@ namespace SmzdmBot
                     var amount = gold >= 49 ? 49 : gold;
                     Thread.Sleep(1000);
                     Pay(amount);
-                    Thread.Sleep(2000);
+                    Thread.Sleep(4000);
                 }
                 else
                 {

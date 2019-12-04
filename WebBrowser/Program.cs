@@ -72,15 +72,12 @@ namespace SmzdmBot
         static void Main(string[] args)
         {
             string mode = "";
-            var accounts = ExcelManager.Load(@"D:\GitHub\smzdm\WebBrowser\bin\Release\data\smzdm.xlsx");
-            //Console.WriteLine(JsonConvert.SerializeObject(accounts));
-            //Console.ReadKey();
-            //RunTasks();
-            //Console.ReadKey();
-            var account = accounts[0];
-            var option = new Option(account);
-            mode = account.mode;
-            //var option = BuildOption(args[0], args);
+            //var accounts = ExcelManager.Load(@"D:\GitHub\smzdm\WebBrowser\bin\Release\data\smzdm.xlsx");
+            //var account = accounts[0];
+            //var option = new Option(account);
+            //mode = account.mode;
+            var option = BuildOption(args[0], args);
+            mode = args[0];
 
             Console.WriteLine(JsonConvert.SerializeObject(option));
             //Console.ReadKey();
@@ -348,6 +345,9 @@ namespace SmzdmBot
                 if (helper.gold > 1)
                 {
                     Console.WriteLine(option.username + " gold=" + helper.gold);
+                    //https://post.smzdm.com/p/awxqx3qm/
+                    //https://post.smzdm.com/p/amm539rz/
+                    helper.TransferGold("https://post.smzdm.com/p/awxqx3qm/");
                 }
                 else
                 {
