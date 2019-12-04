@@ -65,16 +65,3 @@ else :
             print(cmd)
             subprocess.Popen(cmd,creationflags=CREATE_NEW_CONSOLE)
             time.sleep(5)
-
-
-    
-
-
-
-
-
-    
-
-
-
-

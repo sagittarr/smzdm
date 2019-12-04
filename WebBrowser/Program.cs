@@ -84,7 +84,7 @@ namespace SmzdmBot
             //{
             //    return;
             //}
-            
+
             Console.WriteLine(JsonConvert.SerializeObject(option));
             //Console.ReadKey();
             Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -301,7 +301,7 @@ namespace SmzdmBot
                             sourceUrl = Helper.CheckUrl(priceObject.sourceUrl);
                             oldPrice = priceObject.oldPrice;
                         }
-                        //else 
+                        //else
                         //{
                         //    var url = Helper.CheckUrl(list[i]);
                         //    if (url != null)
@@ -326,7 +326,7 @@ namespace SmzdmBot
                     {
                         helper.SubmitBaoLiao(option.descriptionMode, goodPrice, oldPrice, sourceUrl, 0.0, 0.9);
                     }
-                    
+
                 }
                 Console.WriteLine("Finished.");
                 helper.OutputStatus();
@@ -351,6 +351,9 @@ namespace SmzdmBot
                 if (helper.gold > 1)
                 {
                     Console.WriteLine(option.username + " gold=" + helper.gold);
+                    //https://post.smzdm.com/p/awxqx3qm/
+                    //https://post.smzdm.com/p/amm539rz/
+                    helper.TransferGold("https://post.smzdm.com/p/awxqx3qm/");
                 }
                 else
                 {
