@@ -17,10 +17,16 @@ namespace SmzdmBot
     {
         bool login = false;
         public IWebDriver driver;
-        public DealSearchBot()
+        public DealSearchBot(Option option)
         {
-            driver = new FirefoxDriver();
-            //driver = new ChromeDriver();
+            if (option.Browser == "firefox")
+            {
+                driver = new FirefoxDriver();
+            }
+            else
+            {
+                driver = new ChromeDriver();
+            }
         }
         public List<string> GetItemIdFromWikiPage(string wikiPage)
         {

@@ -30,7 +30,11 @@ namespace SmzdmBot
             {
                 if(row["login"].ToString().ToLower() == "y")
                 {
-                    var account = new Account(dataTable.Rows[1]["phone"].ToString(), dataTable.Rows[1]["password"].ToString(), dataTable.Rows[1]["email"].ToString());
+                    var account = new Account(row["phone"].ToString(), row["email"].ToString(), row["password"].ToString());
+                    account.category = row["category"].ToString();
+                    account.pages = row["pages"].ToString();
+                    account.discountRate = Double.Parse(row["discount rate"].ToString());
+                    account.mode = row["mode"].ToString();
                     accounts.Add(account);
                 }
             }

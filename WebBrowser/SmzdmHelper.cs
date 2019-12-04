@@ -26,16 +26,24 @@ namespace SmzdmBot
         public IWebDriver driver;
         public SmzdmWorker(Option opt)
         {
-            //driver = new FirefoxDriver();
-            driver = new ChromeDriver();
+            //
+            if(opt.Browser == "firefox")
+            {
+                driver = new FirefoxDriver();
+            }
+            else
+            {
+                driver = new ChromeDriver();
+            }
+            
             option = opt;
         }
 
-        public SmzdmWorker(Option opt, FirefoxDriver driver)
-        {
-            this.driver = driver;
-            this.option = opt;
-        }
+        //public SmzdmWorker(Option opt, FirefoxDriver driver)
+        //{
+        //    this.driver = driver;
+        //    this.option = opt;
+        //}
 
         public void OutputStatus()
         {

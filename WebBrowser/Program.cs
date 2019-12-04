@@ -10,29 +10,23 @@ namespace SmzdmBot
 
     class Program
     {
-        static void Main(string[] args)
+        private static Option BuildOption(string mode, string[] args)
         {
-            string mode = "";
-            //var accounts = ExcelManager.Load(@"D:\GitHub\smzdm\WebBrowser\data\smzdm.xlsx");
-            //Console.WriteLine(JsonConvert.SerializeObject(accounts));
-            //Console.ReadKey();
-            //RunTasks();
-            //Console.ReadKey();
             Option option = new Option();
-            if (args.Length>=1)
+            if (args.Length >= 1)
             {
                 mode = args[0];
-                if(mode == "smzdm")
+                if (mode == "smzdm")
                 {
                     option.output = args[1];
                     option.pageNumbers = args[2];
                 }
-                else if(mode == "search")
+                else if (mode == "search")
                 {
                     option.input = args[1];
                     option.output = args[2];
                 }
-                else if(mode == "crawl")
+                else if (mode == "crawl")
                 {
                     option.input = args[1];
                     option.output = args[2];
@@ -40,15 +34,15 @@ namespace SmzdmBot
                     {
                         option.CrawlCount = int.Parse(args[3]);
                     }
-                    
+
                 }
-                else if(mode == "login")
+                else if (mode == "login")
                 {
                     option.username = args[1];
                     option.password = args[2];
                     option.output = args[3];
                 }
-                else if(mode == "share")
+                else if (mode == "share")
                 {
                     option = new Option(args.Skip(1).ToArray());
                 }
@@ -60,24 +54,40 @@ namespace SmzdmBot
                     option.pageNumbers = args[11];
                     option.PriceRate = Double.Parse(args[12]);
                 }
-                else if(mode == "wiki_share")
+                else if (mode == "wiki_share")
                 {
                     option = new Option(args.Skip(1).ToArray());
                     option.SmzdmWikiPages = args[10];
-                    if(args.Length>=12) option.PriceRate = Double.Parse(args[11]);
+                    if (args.Length >= 12) option.PriceRate = Double.Parse(args[11]);
                 }
             }
             else
             {
                 Console.WriteLine("unknown command");
                 Console.ReadKey();
-                return;
+                return null;
             }
+            return option;
+        }
+        static void Main(string[] args)
+        {
+            string mode = "";
+            var accounts = ExcelManager.Load(@"D:\GitHub\smzdm\WebBrowser\bin\Release\data\smzdm.xlsx");
+            //Console.WriteLine(JsonConvert.SerializeObject(accounts));
+            //Console.ReadKey();
+            //RunTasks();
+            //Console.ReadKey();
+            var account = accounts[0];
+            var option = new Option(account);
+            mode = account.mode;
+            //var option = BuildOption(args[0], args);
+
             Console.WriteLine(JsonConvert.SerializeObject(option));
+            //Console.ReadKey();
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             if(mode == "smzdm")
             {
-                DealSearchBot bot = new DealSearchBot();
+                DealSearchBot bot = new DealSearchBot(option);
                 var list = bot.GetSmzdmItems(option).ToList();
                 var output = new List<string>();
                 list.ForEach(x => output.Add(JsonConvert.SerializeObject(x)));
@@ -93,7 +103,7 @@ namespace SmzdmBot
             }
             else if (mode == "smzdm_share")
             {
-                DealSearchBot bot = new DealSearchBot();
+                DealSearchBot bot = new DealSearchBot(option);
 
                 var pages = new List<string>();
                 var pagesArr = option.pageNumbers.Split('-');
@@ -162,7 +172,7 @@ namespace SmzdmBot
             }
             else if(mode == "wiki_share")
             {
-                DealSearchBot bot = new DealSearchBot();
+                DealSearchBot bot = new DealSearchBot(option);
                 var priceList = new List<Price>();
                 var pages = option.SmzdmWikiPages.Split(',');
                 var itemUrls = new List<string>();
@@ -229,7 +239,7 @@ namespace SmzdmBot
                     }
                     var urls = lines.Distinct().ToList();
                     if (urls.Count == 0) return;
-                    DealSearchBot bot = new DealSearchBot();
+                    DealSearchBot bot = new DealSearchBot(option);
                     bot.SearchAll(urls, outputPath);
                 }
                 else
@@ -246,7 +256,7 @@ namespace SmzdmBot
                     var outputPath = option.output;
                     var lines = File.ReadAllLines(option.input).ToList();
                     if (lines.Count == 0) return;
-                    DealSearchBot bot = new DealSearchBot();
+                    DealSearchBot bot = new DealSearchBot(option);
                     bot.Crawl(lines[0], outputPath, option.CrawlCount);
                 }
                 else

@@ -27,10 +27,33 @@ namespace SmzdmBot
         public string HotPickCategory = "";
         public string SmzdmWikiPages { get; set; }
         public double PriceRate = 1.1;
+        public string Browser = "firefox";
         private static Dictionary<string, string>  HotPickCategoryMap = new Dictionary<string, string>();
         public Option()
         {
 
+        }
+        public Option(Account account)
+        {
+            if (!String.IsNullOrWhiteSpace(account.email))
+            {
+                username = account.email;
+            }
+            else
+            {
+                username = account.phone;
+            }
+            password = account.password;
+            sourcePath = account.deal;
+            itemLinkOrder = account.order;
+            waitBaoliao = account.waitTime;
+            descriptionMode = account.descriptionMode;
+            baoLiaoStopNumber = account.limit;
+            CustomDescriptionPrefix = account.customDespPrefix;
+            output = account.output;
+            pageNumbers = account.pages;
+            PriceRate = account.discountRate;
+            HotPickCategory = account.category;
         }
         public Option(string[] args)
         {
