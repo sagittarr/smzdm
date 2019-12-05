@@ -1,0 +1,16 @@
+{"oldPrice":1499.0,"currentPrice":1399.0,"coupons":[],"sourceUrl":"https://product.suning.com/0000000000/000000011322935211.html","deposit":0.0,"retainage":0.0,"finalPrice":1399.0,"storeName":"小米苏宁自营旗舰店","ItemName":"自营\r\n小米 (MI) Redmi Note8 Pro 6+64GB 电光灰 6400万四摄小金刚拍照NFC手机超长待机G90T液冷游戏芯6.53“超大全面屏小米红米学生机双卡双待智能"}
+https://product.suning.com/0000000000/000000011322935211.html
+{"oldPrice":1499.0,"currentPrice":1399.0,"coupons":[],"sourceUrl":"https://product.suning.com/0000000000/000000011322935211.html","deposit":0.0,"retainage":0.0,"finalPrice":1399.0,"storeName":"小米苏宁自营旗舰店","ItemName":"自营\r\n小米 (MI) Redmi Note8 Pro 6+64GB 电光灰 6400万四摄小金刚拍照NFC手机超长待机G90T液冷游戏芯6.53“超大全面屏小米红米学生机双卡双待智能"}
+https://product.suning.com/0000000000/000000011322935211.html
+{"oldPrice":1499.0,"currentPrice":1399.0,"coupons":[],"sourceUrl":"https://product.suning.com/0000000000/000000011210599215.html","deposit":0.0,"retainage":0.0,"finalPrice":1399.0,"storeName":"小米苏宁自营旗舰店","ItemName":"自营\r\n小米 (MI) Redmi Note8 Pro 6+ 64GB 冰翡翠 6400万四摄小金刚拍照NFC手机超长待机G90T液冷游戏芯6.53"}
+https://product.suning.com/0000000000/000000011210599215.html
+{"oldPrice":1499.0,"currentPrice":1399.0,"coupons":[],"sourceUrl":"https://product.suning.com/0000000000/000000011322935211.html","deposit":0.0,"retainage":0.0,"finalPrice":1399.0,"storeName":"小米苏宁自营旗舰店","ItemName":"自营\r\n小米 (MI) Redmi Note8 Pro 6+64GB 电光灰 6400万四摄小金刚拍照NFC手机超长待机G90T液冷游戏芯6.53“超大全面屏小米红米学生机双卡双待智能"}
+https://product.suning.com/0000000000/000000011322935211.html
+{"oldPrice":1499.0,"currentPrice":1399.0,"coupons":[],"sourceUrl":"https://product.suning.com/0000000000/000000011210599215.html","deposit":0.0,"retainage":0.0,"finalPrice":1399.0,"storeName":"小米苏宁自营旗舰店","ItemName":"自营\r\n小米 (MI) Redmi Note8 Pro 6+ 64GB 冰翡翠 6400万四摄小金刚拍照NFC手机超长待机G90T液冷游戏芯6.53"}
+https://product.suning.com/0000000000/000000011210599215.html
+{"oldPrice":1499.0,"currentPrice":1399.0,"coupons":[],"sourceUrl":"https://product.suning.com/0000000000/000000011210599101.html","deposit":0.0,"retainage":0.0,"finalPrice":1399.0,"storeName":"小米苏宁自营旗舰店","ItemName":"自营\r\n小米 (MI) Redmi Note8 Pro 6+64GB 电光灰 6400万四摄小金刚拍照NFC手机超长待机G90T液冷游戏芯6.53"}
+https://product.suning.com/0000000000/000000011210599101.html
+{"oldPrice":899.0,"currentPrice":699.0,"coupons":[],"sourceUrl":"https://product.suning.com/0000000000/000000011344612553.html","deposit":0.0,"retainage":0.0,"finalPrice":699.0,"storeName":"小米苏宁自营旗舰店","ItemName":"自营\r\n小米 (MI) Redmi 8A 4+64GB 珊瑚橙 5000mAh 大字体大音量骁龙八核处理器 AI人脸解锁拍照游戏智能双卡双待老年人红米移动联通电信全网通4G手机"}
+https://product.suning.com/0000000000/000000011344612553.html
+{"oldPrice":899.0,"currentPrice":699.0,"coupons":[],"sourceUrl":"https://product.suning.com/0000000000/000000011344612587.html","deposit":0.0,"retainage":0.0,"finalPrice":699.0,"storeName":"小米苏宁自营旗舰店","ItemName":"自营\r\n小米 (MI) Redmi 8A 4+64GB 深海蓝 5000mAh 大字体大音量骁龙八核处理器 AI人脸解锁拍照游戏智能双卡双待老年人红米移动联通电信全网通4G手机"}
+https://product.suning.com/0000000000/000000011344612587.html

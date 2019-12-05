@@ -39,6 +39,9 @@ namespace SmzdmBot
             descriptionMode = 1;
             output = "";
         }
+        public Account()
+        {
+        }
 
     }
 }

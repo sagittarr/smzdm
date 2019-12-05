@@ -1,0 +1,6 @@
+*/.vs
+/WebBrowser/bin/Debug
+/SmzdmBotShared/bin
+/SmzdmBotShared/obj
+/WebBrowser/obj
+/packages

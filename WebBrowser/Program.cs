@@ -73,17 +73,6 @@ namespace SmzdmBot
         {
             string mode = args[0];
             Option option = BuildOption(mode, args);
-            //if(args[0] == "-a")
-            //{
-            //    Console.WriteLine(JsonConvert.SerializeObject(args[1].Trim('"')));
-            //    Console.ReadKey();
-            //    var account = JsonConvert.DeserializeObject<Account>(args[1].Trim('"'));
-            //    option = new Option(account);
-            //}
-            //else
-            //{
-            //    return;
-            //}
 
             Console.WriteLine(JsonConvert.SerializeObject(option));
             //Console.ReadKey();
