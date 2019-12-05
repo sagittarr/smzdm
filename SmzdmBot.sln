@@ -5,9 +5,9 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmzdmBot", "WebBrowser\SmzdmBot.csproj", "{582F73B0-0ED4-4A44-A9F8-C2900B89CE06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmzdmExcelAddin", "C:\Users\justin\Source\Repos\SmzdmExcelAddin\SmzdmExcelAddin\SmzdmExcelAddin.csproj", "{E2168BD1-663A-4DAC-89E9-277010D41674}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmzdmBotShared", "SmzdmBotShared\SmzdmBotShared.csproj", "{696C2A62-1636-40F5-B1DE-558DA197C18E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmzdmExcelAddin", "SmzdmExcelAddin\SmzdmExcelAddin\SmzdmExcelAddin.csproj", "{E2168BD1-663A-4DAC-89E9-277010D41674}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +19,14 @@ Global
 		{582F73B0-0ED4-4A44-A9F8-C2900B89CE06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{582F73B0-0ED4-4A44-A9F8-C2900B89CE06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{582F73B0-0ED4-4A44-A9F8-C2900B89CE06}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E2168BD1-663A-4DAC-89E9-277010D41674}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E2168BD1-663A-4DAC-89E9-277010D41674}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E2168BD1-663A-4DAC-89E9-277010D41674}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E2168BD1-663A-4DAC-89E9-277010D41674}.Release|Any CPU.Build.0 = Release|Any CPU
 		{696C2A62-1636-40F5-B1DE-558DA197C18E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{696C2A62-1636-40F5-B1DE-558DA197C18E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{696C2A62-1636-40F5-B1DE-558DA197C18E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{696C2A62-1636-40F5-B1DE-558DA197C18E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2168BD1-663A-4DAC-89E9-277010D41674}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2168BD1-663A-4DAC-89E9-277010D41674}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2168BD1-663A-4DAC-89E9-277010D41674}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2168BD1-663A-4DAC-89E9-277010D41674}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

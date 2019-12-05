@@ -71,9 +71,13 @@ namespace SmzdmBot
         }
         static void Main(string[] args)
         {
-            string mode = args[0];
-            Option option = BuildOption(mode, args);
-
+            //string mode = args[0];
+            //Option option = BuildOption(mode, args);
+            var arguments = File.ReadAllText(args[0]); ;
+            var account = JsonConvert.DeserializeObject<Account>(arguments);
+            var option = new 
+                Option(account);
+            var mode = account.mode;
             Console.WriteLine(JsonConvert.SerializeObject(option));
             //Console.ReadKey();
             Console.OutputEncoding = System.Text.Encoding.UTF8;

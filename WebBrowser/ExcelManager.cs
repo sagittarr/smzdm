@@ -22,25 +22,25 @@ namespace SmzdmBot
         //        pck.Save();
         //    }
         //}
-        public static List<Account> Load(string path)
-        {
-            DataTable dataTable = GetDataTableFromExcel(path);
-            var accounts = new List<Account>();
-            foreach(DataRow row in dataTable.Rows)
-            {
-                if(row["login"].ToString().ToLower() == "y")
-                {
-                    var account = new Account(row["phone"].ToString(), row["email"].ToString(), row["password"].ToString());
-                    account.category = row["category"].ToString();
-                    account.pages = row["pages"].ToString();
-                    account.discountRate = Double.Parse(row["discount rate"].ToString());
-                    account.mode = row["mode"].ToString();
-                    accounts.Add(account);
-                }
-            }
+        //public static List<Account> Load(string path)
+        //{
+        //    DataTable dataTable = GetDataTableFromExcel(path);
+        //    var accounts = new List<Account>();
+        //    foreach(DataRow row in dataTable.Rows)
+        //    {
+        //        if(row["login"].ToString().ToLower() == "y")
+        //        {
+        //            var account = new Account(row["phone"].ToString(), row["email"].ToString(), row["password"].ToString());
+        //            account.category = row["category"].ToString();
+        //            account.pages = row["pages"].ToString();
+        //            account.discountRate = Double.Parse(row["discount rate"].ToString());
+        //            account.mode = row["mode"].ToString();
+        //            accounts.Add(account);
+        //        }
+        //    }
             
-            return accounts;
-        }
+        //    return accounts;
+        //}
 
         public static DataTable GetDataTableFromExcel(string path, bool hasHeader = true)
         {

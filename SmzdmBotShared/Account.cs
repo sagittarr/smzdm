@@ -8,9 +8,9 @@ namespace SmzdmBot
 {
     public class Account
     {
-        public string phone { get; }
-        public string password { get; }
-        public string email { get; }
+        public string phone { get; set; }
+        public string password { get; set; }
+        public string email { get; set; }
         public string login { get; set; }
         public string deal { get; set; }
         public string nickName { get; set; }
@@ -28,19 +28,24 @@ namespace SmzdmBot
         public double discountRate { get; set; }
         public string category { get; set; }
         public string pages { get; set; }
-        public Account(string phone, string email, string pass)
-        {
-            this.phone = phone;
-            password = pass;
-            this.email = email;
-            waitTime = 5;
-            order = 2;
-            limit = 10;
-            descriptionMode = 1;
-            output = "";
-        }
+        //public Account(string phone, string email, string pass)
+        //{
+        //    this.phone = phone;
+        //    password = pass;
+        //    this.email = email;
+        //    waitTime = 5;
+        //    order = 2;
+        //    limit = 10;
+        //    descriptionMode = 1;
+        //    output = "";
+        //}
         public Account()
         {
+            waitTime = 5;
+            order = 2;
+            limit = 20;
+            descriptionMode = 1;
+            output = "";
         }
 
     }
