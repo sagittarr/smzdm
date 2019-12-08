@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using Newtonsoft.Json;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Interactions;
@@ -45,11 +46,14 @@ namespace SmzdmBot
         //    this.option = opt;
         //}
 
-        public void OutputStatus()
+        public void TransferGoldAndLogStatus()
         {
+            if (!String.IsNullOrWhiteSpace(option.GoldTransferTarget))
+            {
+                this.TransferGold(option.GoldTransferTarget);
+            }
             var status = getStatus();
             Console.WriteLine(status);
-            var output = option.output;
 
             var arr = status.Replace("\r", "").Split('\n');
             for (int i = 0; i < arr.Length; i++)
@@ -66,15 +70,20 @@ namespace SmzdmBot
                     }
                 }
             }
-            if (File.Exists(output))
+
+            var account = new Account();
+            if (option.username.Contains('@'))
             {
-                File.AppendAllText(output, "username:" + option.username + "," + "nickName:" + nickName + ",level:" + Level + ",gold:" + gold + ",left:" + baoLiaoLeft + ",loginTime:" + DateTime.Now + ",status:" + status.Replace("\r", "").Replace("\n", "") + "\n");
+                account.email = option.username;
             }
             else
             {
-                Console.WriteLine(output + " file does not exist.");
-                return;
+                account.phone = option.username;
             }
+            account.Level = Level;
+            account.BaoLiaoLeftCount = baoLiaoLeft;
+            account.GoldLeft = gold;
+            File.AppendAllText(option.StatusFilePath, JsonConvert.SerializeObject(account) + "\n");
         }
         public bool Login()
         {

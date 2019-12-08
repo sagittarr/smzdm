@@ -21,6 +21,7 @@ namespace SmzdmBot
         public string CustomDescriptionPrefix = "";
         public string output = "";
         public string input = "";
+        public string StatusFilePath = "";
         public int CrawlCount = 50;
         public string browser = "firefox";
         public string pageNumbers = "500,502,504";
@@ -28,6 +29,7 @@ namespace SmzdmBot
         public string SmzdmWikiPages { get; set; }
         public double PriceRate = 1.1;
         public string Browser = "firefox";
+        public string GoldTransferTarget { get; set; }
         private static Dictionary<string, string>  HotPickCategoryMap = new Dictionary<string, string>();
         public Option()
         {
@@ -51,6 +53,7 @@ namespace SmzdmBot
             baoLiaoStopNumber = account.limit;
             CustomDescriptionPrefix = account.customDespPrefix;
             output = account.output;
+            StatusFilePath = account.StatusFilePath;
             pageNumbers = account.pages;
             PriceRate = account.discountRate;
             HotPickCategory = account.category;

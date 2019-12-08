@@ -30,10 +30,10 @@
     <DefineConstants>VSTO40</DefineConstants>
     <IsWebBootstrapper>False</IsWebBootstrapper>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <PublishUrl>\\DESKTOP-PP0BREF\smzdm\</PublishUrl>
-    <InstallUrl>\\DESKTOP-PP0BREF\installed\</InstallUrl>
+    <PublishUrl>C:\Users\jiatwang\Documents\publish\smzdmAddin\</PublishUrl>
+    <InstallUrl>\\MININT-VVVOEGS\Users\jiatwang\Documents\publish\smzdmAddin\</InstallUrl>
     <TargetCulture>en</TargetCulture>
-    <ApplicationVersion>1.0.0.2</ApplicationVersion>
+    <ApplicationVersion>1.0.0.4</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -124,7 +124,7 @@
   <ItemGroup>
     <Reference Include="Accessibility" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>D:\GitHub\smzdm\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

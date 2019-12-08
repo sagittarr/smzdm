@@ -8,6 +8,14 @@ namespace SmzdmBot
 {
     public class Account
     {
+        public static Dictionary<string, int> ColumnIndexMapper = new Dictionary<string, int>();
+
+        public int RowIndex { get; set; }
+        public int ColumnIndex(string columnName)
+        {
+            if (ColumnIndexMapper.ContainsKey(columnName)) return ColumnIndexMapper[columnName];
+            return -1;
+        }
         public string phone { get; set; }
         public string password { get; set; }
         public string email { get; set; }
@@ -15,8 +23,13 @@ namespace SmzdmBot
         public string deal { get; set; }
         public string nickName { get; set; }
         public int Level { get; set; }
-        public int baoLiaoCount { get; set; }
 
+        public int BaoLiaoLeftCount { get; set; }
+
+        public string GoldTransferTarget { get; set; }
+        public string StatusFilePath { get; set; }
+        public int GoldLeft { get; set; }
+        //public int baoLiaoCount { get; set; }
         public string arguments { get; set; }
         public string mode { get; set; }
         public int order { get; set; }
