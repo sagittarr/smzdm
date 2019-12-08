@@ -222,11 +222,27 @@ namespace SmzdmBot
             }
             return true;
         }
+        //private string GenerateDespVerbose(string priceText, string source, Price priceObject = null)
+        //{
+        //    if (priceObject == null) return null;
+        //    if (priceObject.deposit > 0)
+        //    {
+
+        //    }
+        //}
         private string GenerateDesp(string priceText, string source, Price priceObject = null)
         {
             var random = new Random();
             var index = 0;
             var text = "";
+            if(priceObject!=null && priceObject.deposit>0 && priceObject.retainage > 0)
+            {
+                text += "预售 ";
+            }
+            if (priceObject != null && priceObject.coupons!=null  && priceObject.coupons.Count>0)
+            {
+                text += "需用券 ";
+            }
             if (string.IsNullOrWhiteSpace(source)){
                 index = random.Next(4);
                 switch (index)

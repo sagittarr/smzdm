@@ -57,7 +57,7 @@ namespace SmzdmBot
             waitTime = 5;
             order = 2;
             limit = 20;
-            descriptionMode = 1;
+            descriptionMode = 0;
             output = "";
         }
 

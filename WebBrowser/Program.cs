@@ -145,7 +145,7 @@ namespace SmzdmBot
                         var goodPrice = price.SmzdmGoodPrice;
                         var sourceUrl = price.sourceUrl;
                         var code = helper.PasteItemUrl(sourceUrl, 0, option.waitBaoliao, option.baoLiaoStopNumber);
-                        if (code == 1) helper.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, option.PriceRate, 0.0);
+                        if (code == 1) helper.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, option.PriceRate, 0.0, price);
                         else if (code == 2)
                         {
                             break;
