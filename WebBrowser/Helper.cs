@@ -27,7 +27,7 @@ namespace SmzdmBot
         public string pageNumbers = "500,502,504";
         public string HotPickCategory = "";
         public string SmzdmWikiPages { get; set; }
-        public double PriceRate = 1.1;
+        public double PriceRate = 1.0;
         public string Browser = "firefox";
         public string GoldTransferTarget { get; set; }
         private static Dictionary<string, string>  HotPickCategoryMap = new Dictionary<string, string>();

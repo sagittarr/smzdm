@@ -187,7 +187,7 @@ namespace SmzdmBot
                 var desp = driver.FindElement(By.Id("un-content-price"));
                 if (desp != null)
                 {
-                    Console.WriteLine("price " + priceText + " "+ smzdmGoodPrice);
+                    Console.WriteLine("current:" + currentPrice + " vs reference:"+ smzdmGoodPrice);
                     var source = Helper.ParseShoppingPlatform(url);
                     
                     if (despMode == 1)

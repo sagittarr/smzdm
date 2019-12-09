@@ -141,7 +141,7 @@ namespace SmzdmExcelAddin
                         category = lists[i][Account.ColumnIndexMapper["category"]],
                         login = lists[i][Account.ColumnIndexMapper["login"]],
                         StatusFilePath = textBox3.Text,
-                        //account.discountRate = Double.Parse(lists[i][Account.ColumnIndexMapper["discount rate"]]);
+                        discountRate = Double.Parse(lists[i][Account.ColumnIndexMapper["discount rate"]]),
                         RowIndex = i
                     };
                     accounts.Add(account);
@@ -199,9 +199,9 @@ namespace SmzdmExcelAddin
                 {
                     if(account.login == "y")
                     {
-                        //var selectedOption = MessageBox.Show(JsonConvert.SerializeObject(account) + "  Please confirm.", "Ready to run?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-                        //if (selectedOption == DialogResult.Yes)
-                        //{
+                        var selectedOption = MessageBox.Show(JsonConvert.SerializeObject(account) + "  Please confirm.", "Ready to run?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                        if (selectedOption == DialogResult.Yes)
+                        {
                             var argPath = "./arguments.txt";
                             File.WriteAllText(argPath, JsonConvert.SerializeObject(account));
                             try
@@ -213,7 +213,7 @@ namespace SmzdmExcelAddin
                             {
                                 MessageBox.Show(es.Message);
                             }
-                        //}
+                        }
                     }
                 }
 

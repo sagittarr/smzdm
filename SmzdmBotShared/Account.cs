@@ -58,6 +58,7 @@ namespace SmzdmBot
             order = 2;
             limit = 20;
             descriptionMode = 0;
+            discountRate = 1.0;
             output = "";
         }
 
