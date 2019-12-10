@@ -121,6 +121,7 @@ namespace SmzdmBot
             if (logined)
             {
                 driver.Navigate().GoToUrl(@"https://www.smzdm.com/");
+                driver.Navigate().Refresh();
                 driver.FindElement(By.ClassName("J_punch")).Click();
                 Console.WriteLine("Check-in punched.");
                 driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
@@ -183,12 +184,12 @@ namespace SmzdmBot
                     return true;
                 }
                 driver.FindElement(By.Id("un-content-price")).Click();
-                Thread.Sleep(500);
+                Thread.Sleep(2000);
                 var desp = driver.FindElement(By.Id("un-content-price"));
                 if (desp != null)
                 {
                     Console.WriteLine("current:" + currentPrice + " vs reference:"+ smzdmGoodPrice);
-                    var source = Helper.ParseShoppingPlatform(url);
+                    var vender = Helper.GenerateVenderName(url, priceObject);
                     
                     if (despMode == 1)
                     {
@@ -196,7 +197,7 @@ namespace SmzdmBot
                     }
                     else if (despMode == 0)
                     { 
-                        desp.SendKeys(GenerateDesp(priceText, source, priceObject));
+                        desp.SendKeys(GenerateDesp(priceText, vender, priceObject));
                     }
                     else
                     {
@@ -222,103 +223,44 @@ namespace SmzdmBot
             }
             return true;
         }
-        //private string GenerateDespVerbose(string priceText, string source, Price priceObject = null)
-        //{
-        //    if (priceObject == null) return null;
-        //    if (priceObject.deposit > 0)
-        //    {
 
-        //    }
-        //}
-        private string GenerateDesp(string priceText, string source, Price priceObject = null)
+        private string GetRandomOne(List<string> candidates)
         {
             var random = new Random();
-            var index = 0;
-            var text = "";
-            if(priceObject!=null && priceObject.deposit>0 && priceObject.retainage > 0)
+            var index = random.Next(candidates.Count);
+            return candidates[index];
+        }
+        private string GenerateDesp(string priceText, string vender, Price priceObject = null)
+        {
+            var desp = "";
+            desp += GetRandomOne(new List<string>() { "预计到手价", "预计到手", "目前优惠价", "现活动价", "优惠后售价" }) + priceText;
+            if (priceObject != null)
             {
-                text += "预售 ";
-            }
-            if (priceObject != null && priceObject.coupons!=null  && priceObject.coupons.Count>0)
-            {
-                text += "需用券 ";
-            }
-            if (string.IsNullOrWhiteSpace(source)){
-                index = random.Next(4);
-                switch (index)
+                double quote = Double.Parse(Helper.ParseDigits(priceText));
+                Console.WriteLine("Quote " + quote + " vs MyPrice " + priceObject.finalPrice);
+                if (priceObject.finalPrice <= quote && vender == "京东")
                 {
-                    case 0:
-                        text = "目前优惠价" +priceText;
-                        break;
-                    case 1:
-                        text = "现促销价" +priceText;
-                        break;
-                    case 2:
-                        text = "优惠后售价" +priceText;
-                        break;
-                    case 3:
-                        text = "预计到手价" + priceText;
-                        break;
-                    default:
-                        text = "目前优惠价" + priceText;
-                        break;
+                    if (!string.IsNullOrWhiteSpace(priceObject.PromoteNote))
+                    {
+                        desp += " " + priceObject.PromoteNote + " ";
+                    }
                 }
-            }
-            else
-            {
-                index = random.Next(7);
-                switch (index)
+                if (priceObject.Notes.Count > 0)
                 {
-                    case 0:
-                        text = "目前"+source+"优惠价" + priceText;
-                        break;
-                    case 1:
-                        if (priceObject!=null && priceObject.storeName != null)
-                        {
-                            text = "目前优惠价" + priceText + ", 价格来自" + source+" "+priceObject.storeName;
-                        }
-                        else
-                        {
-                            text = "目前优惠价" + priceText + ", 价格来自" + source;
-                        }
-                        break;
-                    case 2:
-                        text = source+"预计到手价" + priceText;
-                        break;
-                    case 3:
-                        text = source + "活动价" + priceText;
-                        break;
-                    case 4:
-                        text = "优惠后到手价预计" + priceText+ ", 来自" + source;
-                        break;
-                    case 5:
-                        text = source+ "好价" + priceText;
-                        break;
-                    case 6:
-                        text = source + "到手价" + priceText;
-                        break;
+                    desp += " " + string.Join(" ", priceObject.Notes);
+                }
+                if (!string.IsNullOrWhiteSpace(vender))
+                {
+                    desp += " 来自" + vender;
+                    if (!String.IsNullOrWhiteSpace(priceObject.storeName))
+                    {
+                        desp += " " + priceObject.storeName;
+                    }
+                }
 
-                    default:
-                        text = "目前优惠价" + priceText;
-                        break;
-                }
             }
-            
-            index = random.Next(3);
-            switch (index)
-            {
-                case 0:
-                    text = text + " 喜欢的可以入手";
-                    break;
-                case 1:
-                    text = text + " 有兴趣的值友可以看看";
-                    break;
-                case 2:
-                    break;
-                default:
-                    break;
-            }
-            return text;
+            desp += " " + GetRandomOne(new List<string>() { "喜欢的可以入手", "有兴趣的值友可以看看", "刚需可入" });
+            return desp;
         }
         private int GetNumber(string input)
         {

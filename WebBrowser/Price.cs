@@ -38,9 +38,13 @@ namespace SmzdmBot
 
         public string SmzdmGoUrl { get; set; }
 
+        public double Cut { get; set; }
+        public List<string> Notes { get; set; }
+        public string PromoteNote { get; set; }
         public Price()
         {
             coupons = new List<List<double>>();
+            Notes = new List<string>();
         }
         private double ApplyCoupon(List<List<double>> _coupons, double price)
         {

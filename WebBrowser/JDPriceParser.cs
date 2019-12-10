@@ -10,10 +10,10 @@ namespace SmzdmBot
 {
     public class JDPriceParser
     {
-        public static string ParseDigits(string input)
-        {
-            return new string(input.Where(x => x == '.' || Char.IsDigit(x)).ToArray());
-        }
+        //public static string ParseDigits(string input)
+        //{
+        //    return new string(input.Where(x => x == '.' || Char.IsDigit(x)).ToArray());
+        //}
         //public static string  GenerateDescription(Price price, string url){
         //    if (price.oldPrice != 0 && price.finalPrice != 0 && price.finalPrice < price.oldPrice)
         //    {
@@ -29,7 +29,121 @@ namespace SmzdmBot
         //}
         public static Price ExtractPrice(IWebDriver driver)
         {
-            return null;
+            //if (driver.Url.StartsWith("https://item.jd.com/"))
+            //{
+            var price = new Price();
+            var info = driver.FindElement(By.ClassName("itemInfo-wrap")).Text;
+            info = info.Replace("\r", "");
+            Console.WriteLine("info\n" + info);
+            //File.WriteAllText(@"D:\test.txt", info);
+            var lines = info.Split('\n');
+            for(int i =0; i< lines.Length; i++)
+            {
+                if (lines[i] == "京 东 价" || lines[i] == "秒 杀 价" || lines[i] == "闪 购 价")
+                {
+                    if (i + 1 < lines.Length)
+                    {
+                        var priceText = lines[i + 1];
+                        var parts = priceText.Split('[');
+                        if(parts.Length == 2)
+                        {
+                            var current = Helper.ParseDigits(parts[0]);
+                            var reference = Helper.ParseDigits(parts[1]);
+                            price.currentPrice = Double.Parse(current);
+                            Console.WriteLine("current " + current + " vs reference " + reference);
+                        }
+                        else if(parts.Length == 1)
+                        {
+                            var current = Helper.ParseDigits(parts[0]);
+                            price.currentPrice = Double.Parse(current);
+                            Console.WriteLine("current " + current );
+                        }
+                    }
+                   
+                }
+                if (lines[i].StartsWith("满减"))
+                {
+                    var idex = lines[i].IndexOf("元减");
+                    if (idex > 0)
+                    {
+                        var part1 = lines[i].Substring(0, idex);
+                        var part2 = lines[i].Substring(idex);
+                        var condition = Helper.ParseDigits(part1);
+                        var cut = Helper.ParseDigits(part2);
+                        price.PromoteNote = "满" + condition + "减" + cut;
+                        price.coupons.Add(new List<double>() { Double.Parse(condition), Double.Parse(cut) });
+                        Console.WriteLine("condition " + condition + " vs cut " + cut);
+                    }
+                }
+            }
+            var storeName = "";
+            foreach (var element in driver.FindElements(By.ClassName("item")))
+            {
+                if (element.FindElements(By.ClassName("name")).Count == 1)
+                {
+                    storeName = element.FindElement(By.ClassName("name")).Text;
+                    price.storeName = storeName;
+                    Console.WriteLine("storeName:" + storeName);
+                }
+
+            }
+            if (driver.FindElements(By.Id("p-ad")).Count == 1)
+            {
+                var note = driver.FindElement(By.Id("p-ad")).Text;
+                Console.WriteLine("note\n" + note);
+                var idx = note.IndexOf("立减");
+                if (idx != -1)
+                {
+                    var text = note.Substring(idx);
+                    var idx2 = text.IndexOf("元");
+                    if (idx2 != -1)
+                    {
+                        var cutText = text.Substring(0, idx2);
+                        var cut = Helper.ParseDigits(cutText);
+                        price.Cut = Double.Parse(cut);
+                        Console.WriteLine("promote cut\n" + cut);
+                    }
+                }
+                idx = note.IndexOf("12.12");
+                if (idx != -1)
+                {
+                    price.Notes.Add("双十二特惠");
+                }
+                //idx = note.IndexOf("保价");
+                //if (idx != -1)
+                //{
+                //    var part = note.Substring(idx);
+                //    var idx2 = part.IndexOf("天");
+                //    if (idx2 != -1)
+                //    {
+                //        var part2 = part.Substring(0, idx2);
+
+                //    }
+                //}
+            }
+            if (driver.FindElements(By.ClassName("activity-message")).Count == 1)
+            {
+                var note = driver.FindElement(By.ClassName("activity-message")).Text;
+                Console.WriteLine("act\n" + note);
+                //File.AppendAllText(@"D:\test.txt", note);
+            }
+            if (driver.FindElements(By.ClassName("p-parameter")).Count == 1)
+            {
+                var note = driver.FindElement(By.ClassName("p-parameter")).Text;
+                Console.WriteLine("parameter\n" + note);
+                var _lines = note.Split('\n');
+                foreach (var l in _lines)
+                {
+                    if (l.StartsWith("能效等级："))
+                    {
+                        price.Notes.Add(l);
+                        Console.WriteLine("parameter note\n" + l);
+                    }
+                }
+                //File.AppendAllText(@"D:\test.txt", note);
+            }
+            //}
+            return price;
         }
         public static Price Parse(string text, string url)
         {

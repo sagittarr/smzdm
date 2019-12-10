@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Firefox;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -71,8 +72,18 @@ namespace SmzdmBot
         }
         static void Main(string[] args)
         {
+            //IWebDriver driver = new FirefoxDriver();
+            //driver.Navigate().GoToUrl("https://item.jd.com/57123089856.html");
+            //if (!driver.Url.StartsWith("https://item.jd.com/"))
+            //{
+            //    driver.Navigate().GoToUrl("https://item.jd.com/57123089856.html");
+            //}
+            //JDPriceParser.ExtractPrice(driver);
+            //Console.ReadKey();
+            
             //string mode = args[0];
             //Option option = BuildOption(mode, args);
+
             var arguments = File.ReadAllText(args[0]); ;
             var account = JsonConvert.DeserializeObject<Account>(arguments);
             var option = new 

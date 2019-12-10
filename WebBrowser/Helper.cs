@@ -131,7 +131,7 @@ namespace SmzdmBot
             int index = random.Next(list.Count);
             return list[index];
         }
-        public static string ParseShoppingPlatform(string url)
+        public static string GenerateVenderName(string url, Price price)
         {
             if (url.StartsWith("https://product.suning.com/") || url.StartsWith("http://product.suning.com/"))
             {

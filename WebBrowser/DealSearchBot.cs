@@ -214,6 +214,25 @@ namespace SmzdmBot
                             driver.FindElement(By.ClassName("gobuy")).Click();
                             Console.WriteLine("Wait 5s for redirect from re.jd.com");
                             Thread.Sleep(5000);
+                            if (driver.Url.StartsWith("https://passport.jd.com/"))
+                            {
+                                var parts = driver.Url.Split("?=".ToCharArray());
+                                foreach(var p in parts)
+                                {
+                                    if (p.StartsWith("https://item.jd.com/"))
+                                    {
+                                        driver.Navigate().GoToUrl(p);
+                                        price = JDPriceParser.ExtractPrice(driver);
+                                        break;
+                                    }
+                                }
+                                
+                            }
+                            
+                        }
+                        else if (driver.Url.StartsWith("https://item.jd.com/") || driver.Url.StartsWith("http://item.jd.com/"))
+                        {
+                            price = JDPriceParser.ExtractPrice(driver);
                         }
                         //if(driver.Url.StartsWith("https://item.jd.com/") || driver.Url.StartsWith("http://item.jd.com/"))
                         //{
@@ -236,25 +255,6 @@ namespace SmzdmBot
             return null;
         }
 
-        //public List<Price> CheckSmzdmItemFromWiki(Dictionary<string, string> it)
-        //{
-        //    if (it == null) return null;
-        //    var list = new List<Price>();
-        //    foreach (var link in it.SmzdmGoUrls)
-        //    {
-        //        var dict = new Dictionary<string, string>();
-        //        dict.Add("smzdmProduct", it.SmzdmProductUrl);
-        //        dict.Add("smzdmItemTitle", it.SmzdmItemTitle);
-        //        dict.Add("smzdmGo", link);
-        //        dict.Add("smzdmGoodPrice", it.SmzdmGoodPrice.ToString());
-        //        var price = CheckSmzdmItem(dict);
-        //        if (price != null)
-        //        {
-        //            list.Add(price);
-        //        }
-        //    }
-        //    return list;
-        //}
         public List<Price> GetSmzdmItems(Option option)
         {
             var deals = new List<Price>();
