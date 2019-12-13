@@ -27,6 +27,7 @@ namespace SmzdmBot
             {
                 driver = new ChromeDriver();
             }
+            //driver = new ChromeDriver();
         }
         public List<string> GetItemIdFromWikiPage(string wikiPage)
         {

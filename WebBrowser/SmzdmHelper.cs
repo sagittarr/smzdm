@@ -28,7 +28,7 @@ namespace SmzdmBot
         public SmzdmWorker(Option opt)
         {
             //
-            if(opt.Browser == "firefox")
+            if (opt.Browser == "firefox")
             {
                 driver = new FirefoxDriver();
             }
@@ -36,7 +36,7 @@ namespace SmzdmBot
             {
                 driver = new ChromeDriver();
             }
-            
+            //driver = new ChromeDriver();
             option = opt;
         }
 

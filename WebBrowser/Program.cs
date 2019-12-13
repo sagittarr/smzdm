@@ -111,7 +111,6 @@ namespace SmzdmBot
             else if (mode == "smzdm_share")
             {
                 DealSearchBot bot = new DealSearchBot(option);
-
                 var pages = new List<string>();
                 var pagesArr = option.pageNumbers.Split('-');
                 var pageCode = option.ConvertHotPickCategory(option.HotPickCategory);
@@ -123,7 +122,7 @@ namespace SmzdmBot
                 }
                 for (int i = st; i <= end; i++)
                 {
-                    pages.Add("https://www.smzdm.com/jingxuan/xuan/" + pageCode + i.ToString() + "/");
+                    pages.Add( pageCode + i.ToString() + "/");
                 }
                 var helper = new SmzdmWorker(option);
                 if (!helper.Login())
@@ -153,6 +152,7 @@ namespace SmzdmBot
                     var price = bot.CheckSmzdmItem(it);
                     if (price != null)
                     {
+                        price.Calculate();
                         var goodPrice = price.SmzdmGoodPrice;
                         var sourceUrl = price.sourceUrl;
                         var code = helper.PasteItemUrl(sourceUrl, 0, option.waitBaoliao, option.baoLiaoStopNumber);
