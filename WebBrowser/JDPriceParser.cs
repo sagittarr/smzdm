@@ -10,23 +10,6 @@ namespace SmzdmBot
 {
     public class JDPriceParser
     {
-        //public static string ParseDigits(string input)
-        //{
-        //    return new string(input.Where(x => x == '.' || Char.IsDigit(x)).ToArray());
-        //}
-        //public static string  GenerateDescription(Price price, string url){
-        //    if (price.oldPrice != 0 && price.finalPrice != 0 && price.finalPrice < price.oldPrice)
-        //    {
-        //        Console.WriteLine("~~~~~~~GoodPrice " + price.oldPrice + " " + price.finalPrice);
-        //        return "原价" + (int)price.oldPrice + "元，预计到手价" + (int)price.finalPrice + "元";
-        //        //File.AppendAllText(@"D:\test.txt", "~~~~~~~GoodPrice " + price.oldPrice + " " + price.finalPrice + "\n");
-        //    }
-        //    else if (price.retainage > 0 && price.deposit > 0)
-        //    {
-        //        Console.WriteLine("~~~~~~~GoodPrice " + price.finalPrice);
-        //        //File.AppendAllText(@"D:\test.txt", "~~~~~~~GoodPrice " + price.finalPrice + "\n");
-        //    }
-        //}
         public static Price ExtractPrice(IWebDriver driver)
         {
             //if (driver.Url.StartsWith("https://item.jd.com/"))
@@ -75,6 +58,10 @@ namespace SmzdmBot
                         Console.WriteLine("condition " + condition + " vs cut " + cut);
                     }
                 }
+                if (lines[i]=="优 惠 券")
+                {
+                    price.Notes.Add("需用优惠券");
+                }
             }
             var storeName = "";
             foreach (var element in driver.FindElements(By.ClassName("item")))
@@ -85,6 +72,10 @@ namespace SmzdmBot
                     price.storeName = storeName;
                     Console.WriteLine("storeName:" + storeName);
                 }
+                //else
+                //{
+                //    Console.WriteLine("fail to process store name");
+                //}
 
             }
             if (driver.FindElements(By.Id("p-ad")).Count == 1)
