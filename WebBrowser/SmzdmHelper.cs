@@ -120,11 +120,10 @@ namespace SmzdmBot
             }
             if (logined)
             {
-                driver.Navigate().GoToUrl(@"https://www.smzdm.com/");
-                driver.Navigate().Refresh();
-                driver.FindElement(By.ClassName("J_punch")).Click();
-                Console.WriteLine("Check-in punched.");
-                driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
+                if (Punch(driver))
+                {
+                    driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
+                }
                 return true;
             }
             else
@@ -144,7 +143,27 @@ namespace SmzdmBot
            
         }
 
-
+        private bool Punch(IWebDriver driver)
+        {
+            int counter = 0;
+            while (counter < 3)
+            {
+                try
+                {
+                    driver.Navigate().GoToUrl(@"https://www.smzdm.com/");
+                    driver.Navigate().Refresh();
+                    driver.FindElement(By.ClassName("J_punch")).Click();
+                    Console.WriteLine("Check-in punched.");
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    counter++;
+                }
+            }
+            return false;
+        }
 
         public bool SubmitBaoLiao(int despMode, double smzdmGoodPrice, double oldPrice, string url, double rate1, double rate2, Price priceObject = null)
         {
