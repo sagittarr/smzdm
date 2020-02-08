@@ -75,7 +75,8 @@ namespace SmzdmBot
             var temp = "https://www.smzdm.com/jingxuan/xuan/";
             if (HotPickCategoryMap.Count == 0)
             {
-                HotPickCategoryMap.Add("computers", temp+"s0f163t0b0d0r0p");
+                HotPickCategoryMap.Add("3c", temp+"s0f163t0b0d0r0p");
+                HotPickCategoryMap.Add("computers", temp + "s0f163t0b0d0r0p");
                 HotPickCategoryMap.Add("ele", temp + "s0f27t0b0d0r0p");
                 HotPickCategoryMap.Add("sports", temp + "s0f191t0b0d0r0p");
                 HotPickCategoryMap.Add("beauty", temp + "s0f113t0b0d0r0p");
@@ -84,7 +85,7 @@ namespace SmzdmBot
                 HotPickCategoryMap.Add("things", temp + "s0f1515t0b0d0r0p");
                 HotPickCategoryMap.Add("cloth", temp + "s0f57t0b0d0r0p1");
                 HotPickCategoryMap.Add("suning", "https://search.smzdm.com/?c=faxian&s=苏宁数码&v=a&p=");
-                HotPickCategoryMap.Add("jiqi", "https://search.smzdm.com/?c=faxian&s=京奇宝物&v=b&p=");
+                HotPickCategoryMap.Add("jingqi", "https://search.smzdm.com/?c=faxian&s=京奇宝物&v=b&p=");
             }
             return HotPickCategoryMap[name];
         }
