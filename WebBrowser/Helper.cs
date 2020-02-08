@@ -82,6 +82,7 @@ namespace SmzdmBot
                 HotPickCategoryMap.Add("mother", temp + "s0f75t0b0d0r0p");
                 HotPickCategoryMap.Add("home", temp + "s0f37t0b0d0r0p");
                 HotPickCategoryMap.Add("things", temp + "s0f1515t0b0d0r0p");
+                HotPickCategoryMap.Add("cloth", temp + "s0f57t0b0d0r0p1");
                 HotPickCategoryMap.Add("suning", "https://search.smzdm.com/?c=faxian&s=苏宁数码&v=a&p=");
                 HotPickCategoryMap.Add("jiqi", "https://search.smzdm.com/?c=faxian&s=京奇宝物&v=b&p=");
             }

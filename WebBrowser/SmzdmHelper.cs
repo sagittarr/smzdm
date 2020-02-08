@@ -278,7 +278,7 @@ namespace SmzdmBot
                 }
 
             }
-            desp += " " + GetRandomOne(new List<string>() { "喜欢的可以入手", "有兴趣的值友可以看看", "刚需可入" });
+            desp += " " + GetRandomOne(new List<string>() { "喜欢的可以入手", "有兴趣的值友可以看看", "有需要的值友不要错过","值得关注" });
             return desp;
         }
         private int GetNumber(string input)

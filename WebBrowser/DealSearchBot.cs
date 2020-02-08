@@ -192,10 +192,12 @@ namespace SmzdmBot
                 Console.WriteLine(driver.Url);
                 try
                 {
+                    var url = "";
                     driver.FindElement(By.ClassName("new-baike-card"));
                     if (Helper.ToUrl(driver, it["smzdmGo"]))
                     {
                         Console.WriteLine(driver.Url);
+                        url = driver.Url;
                         var price = new Price();
                         if (driver.Url.StartsWith("https://product.suning.com/") || driver.Url.StartsWith("http://product.suning.com/"))
                         {
@@ -224,6 +226,8 @@ namespace SmzdmBot
                                     {
                                         driver.Navigate().GoToUrl(p);
                                         price = JDPriceParser.ExtractPrice(driver);
+                                        //driver.Close();
+                                        //Console.WriteLine("close page1");
                                         break;
                                     }
                                 }
@@ -234,19 +238,23 @@ namespace SmzdmBot
                         else if (driver.Url.StartsWith("https://item.jd.com/") || driver.Url.StartsWith("http://item.jd.com/"))
                         {
                             price = JDPriceParser.ExtractPrice(driver);
+                            //driver.Close();
+                            //Console.WriteLine("close page2");
                         }
                         //if(driver.Url.StartsWith("https://item.jd.com/") || driver.Url.StartsWith("http://item.jd.com/"))
                         //{
                         //    price = JDPriceParser.ExtractPrice();
                         //}
                         price.SmzdmGoodPrice = double.Parse(it["smzdmGoodPrice"]);
-                        price.sourceUrl = driver.Url;
+                        price.sourceUrl = url;
                         price.SmzdmItemTitle = it["smzdmItemTitle"];
                         price.SmzdmGoUrl = it["smzdmGo"];
 
                         Console.WriteLine("added " + price.sourceUrl + " " + price.SmzdmGoodPrice);
+                        
                         return price;
                     }
+
                 }
                 catch (NoSuchElementException e)
                 {
