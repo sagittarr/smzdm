@@ -85,7 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CsvHelper.cs" />
-    <Compile Include="DealSearchBot.cs" />
+    <Compile Include="DealFinder.cs" />
     <Compile Include="ExcelManager.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="PhoneFinder.cs" />
@@ -93,8 +93,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="JDPriceParser.cs" />
-    <Compile Include="SmzdmHelper.cs" />
+    <Compile Include="DealPublisher.cs" />
     <Compile Include="SUNINGPriceParser.cs" />
+    <Compile Include="TaskManager.cs" />
     <Compile Include="TMPriceParser.cs" />
   </ItemGroup>
   <ItemGroup>

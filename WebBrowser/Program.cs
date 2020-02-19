@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using System;
@@ -72,29 +73,18 @@ namespace SmzdmBot
         }
         static void Main(string[] args)
         {
-            //IWebDriver driver = new FirefoxDriver();
-            //driver.Navigate().GoToUrl("https://item.jd.com/57123089856.html");
-            //if (!driver.Url.StartsWith("https://item.jd.com/"))
-            //{
-            //    driver.Navigate().GoToUrl("https://item.jd.com/57123089856.html");
-            //}
-            //JDPriceParser.ExtractPrice(driver);
-            //Console.ReadKey();
-            
-            //string mode = args[0];
-            //Option option = BuildOption(mode, args);
-
+            TaskManager.LoadTasks(args, @"C:\Users\jiatwang\Documents\test.txt").Wait();
+            return;
             var arguments = File.ReadAllText(args[0]); ;
             var account = JsonConvert.DeserializeObject<Account>(arguments);
-            var option = new 
-                Option(account);
+            var option = new Option(account);
             var mode = account.mode;
             Console.WriteLine(JsonConvert.SerializeObject(option));
             //Console.ReadKey();
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             if(mode == "smzdm")
             {
-                DealSearchBot bot = new DealSearchBot(option);
+                DealFinder bot = new DealFinder(option);
                 var list = bot.GetSmzdmItems(option).ToList();
                 var output = new List<string>();
                 list.ForEach(x => output.Add(JsonConvert.SerializeObject(x)));
@@ -110,21 +100,29 @@ namespace SmzdmBot
             }
             else if (mode == "smzdm_share")
             {
-                DealSearchBot bot = new DealSearchBot(option);
+                DealFinder bot = new DealFinder(option);
                 var pages = new List<string>();
-                var pagesArr = option.pageNumbers.Split('-');
-                var pageCode = option.ConvertHotPickCategory(option.HotPickCategory);
-                var st = int.Parse(pagesArr[0]);
-                var end = st;
-                if (pagesArr.Length > 1)
+                if(option.pageNumbers == "auto")
                 {
-                    end = int.Parse(pagesArr[1]);
+
                 }
-                for (int i = st; i <= end; i++)
+                else
                 {
-                    pages.Add( pageCode + i.ToString() + "/");
+                    var pagesArr = option.pageNumbers.Split('-');
+                    var pageCode = option.ConvertHotPickCategory(option.HotPickCategory);
+                    var st = int.Parse(pagesArr[0]);
+                    var end = st;
+                    if (pagesArr.Length > 1)
+                    {
+                        end = int.Parse(pagesArr[1]);
+                    }
+                    for (int i = st; i <= end; i++)
+                    {
+                        pages.Add(pageCode + i.ToString() + "/");
+                    }
                 }
-                var helper = new SmzdmWorker(option);
+
+                var helper = new DealPublisher(option);
                 if (!helper.Login())
                 {
                     return;
@@ -179,7 +177,7 @@ namespace SmzdmBot
             }
             else if(mode == "wiki_share")
             {
-                DealSearchBot bot = new DealSearchBot(option);
+                DealFinder bot = new DealFinder(option);
                 var priceList = new List<Price>();
                 var pages = option.SmzdmWikiPages.Split(',');
                 var itemUrls = new List<string>();
@@ -192,7 +190,7 @@ namespace SmzdmBot
                 Console.WriteLine("Collected " + itemUrls.Count + " wiki items");
                 if (itemUrls!=null && itemUrls.Count > 0)
                 {
-                    var helper = new SmzdmWorker(option);
+                    var helper = new DealPublisher(option);
                     if (!helper.Login())
                     {
                         return;
@@ -246,7 +244,7 @@ namespace SmzdmBot
                     }
                     var urls = lines.Distinct().ToList();
                     if (urls.Count == 0) return;
-                    DealSearchBot bot = new DealSearchBot(option);
+                    DealFinder bot = new DealFinder(option);
                     bot.SearchAll(urls, outputPath);
                 }
                 else
@@ -263,7 +261,7 @@ namespace SmzdmBot
                     var outputPath = option.output;
                     var lines = File.ReadAllLines(option.input).ToList();
                     if (lines.Count == 0) return;
-                    DealSearchBot bot = new DealSearchBot(option);
+                    DealFinder bot = new DealFinder(option);
                     bot.Crawl(lines[0], outputPath, option.CrawlCount);
                 }
                 else
@@ -275,7 +273,7 @@ namespace SmzdmBot
             }
             else if (mode == "share")
             {
-                var helper = new SmzdmWorker(option);
+                var helper = new DealPublisher(option);
                 //var list = GetItemList(helper);
                 var list =  File.ReadAllLines(option.sourcePath).ToList();
                 if(list == null || list.Count == 0)
@@ -345,8 +343,9 @@ namespace SmzdmBot
             }
             else if (mode == "login")
             {
-                var helper = new SmzdmWorker(option);
-                if (!helper.Login())
+                var helper = new DealPublisher(option);
+                //if (!helper.Login())
+                if(!DealPublisher.LoginRetry(helper))
                 {
                     return;
                 }
@@ -371,6 +370,64 @@ namespace SmzdmBot
                 return;
             }
             return;
+        }
+        static void Run(Option option, DealFinder dealSeachBot, DealPublisher worker)
+        {
+                DealFinder searchBot = new DealFinder(option);
+                var pages = new List<string>();
+                var pageUrl = option.ConvertHotPickCategory(option.HotPickCategory);
+                pages.Add(pageUrl);
+                if (!worker.signed && !worker.Login())
+                {
+                    return;
+                }
+
+                var smzdmItemList = new List<Dictionary<string, string>>();
+                foreach (var page in pages)
+                {
+                    searchBot.driver.Navigate().GoToUrl(page);
+                    var items = searchBot.driver.FindElements(By.ClassName("z-feed-content")).ToList();
+
+                    foreach (IWebElement item in items)
+                    {
+                        var it = searchBot.GetSmzdmItem(item);
+                        if (it != null)
+                        {
+                            smzdmItemList.Add(it);
+                        }
+
+                    }
+                }
+                Console.WriteLine("Collected good price count " + smzdmItemList.Count);
+                foreach (var it in smzdmItemList)
+                {
+                    var price = searchBot.CheckSmzdmItem(it);
+                    if (price != null)
+                    {
+                        price.Calculate();
+                        var goodPrice = price.SmzdmGoodPrice;
+                        var sourceUrl = price.sourceUrl;
+                        var code = worker.PasteItemUrl(sourceUrl, 0, option.waitBaoliao, option.baoLiaoStopNumber);
+                        if (code == 1) worker.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, option.PriceRate, 0.0, price);
+                        else if (code == 2)
+                        {
+                            break;
+                        }
+                    }
+                }
+                //helper.Like();
+                //Console.WriteLine("Finished.");
+                //worker.TransferGoldAndLogStatus();
+                //if (worker.gold > 1)
+                //{
+                //    Console.WriteLine(option.username + " gold=" + worker.gold);
+                //    //helper.TransferGold("https://post.smzdm.com/p/amm539rz/");
+                //}
+                //else
+                //{
+                //    worker.Shutdown();
+                //}
+                //return;
         }
     }
 }

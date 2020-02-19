@@ -54,7 +54,12 @@ namespace SmzdmBot
             CustomDescriptionPrefix = account.customDespPrefix;
             output = account.output;
             StatusFilePath = account.StatusFilePath;
+            if (!account.pages.Contains("-"))
+            {
+
+            }
             pageNumbers = account.pages;
+
             PriceRate = account.discountRate;
             HotPickCategory = account.category;
         }

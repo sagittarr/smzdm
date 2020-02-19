@@ -16,16 +16,17 @@ using System.Threading.Tasks;
 
 namespace SmzdmBot
 {
-    public class SmzdmWorker
+    public class DealPublisher
     {
         public int Level = -1;
         public int baoLiaoLeft = -1;
         public int startNumber = -1;
         public string nickName = "";
         public int gold = -1;
+        public bool signed = false;
         public Option option;
         public IWebDriver driver;
-        public SmzdmWorker(Option opt)
+        public DealPublisher(Option opt)
         {
             //
             if (opt.Browser == "firefox")
@@ -85,20 +86,36 @@ namespace SmzdmBot
             account.GoldLeft = gold;
             File.AppendAllText(option.StatusFilePath, JsonConvert.SerializeObject(account) + "\n");
         }
-        public bool Login()
+        public static bool LoginRetry(DealPublisher worker, int retry = 8)
+        {
+            int count = 0;
+            while (!worker.Login(3))
+            {
+                worker.Shutdown();
+                worker = new DealPublisher(worker.option);
+                count++;
+                if (count >= retry)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        public bool Login(int counter = 100)
         {
             driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
             driver.Navigate().Refresh();
             driver.FindElement(By.Id("username")).SendKeys(option.username); //"18604568194" smzdm24202@outlook.com
+            Thread.Sleep(1000);
             driver.FindElement(By.Id("password")).Click();
+            Thread.Sleep(505);
             driver.FindElement(By.Id("password")).SendKeys(option.password);
-
+            Thread.Sleep(3043);
             var login = driver.FindElement(By.Id("login_submit"));
             if (login != null)
             {
                 login.Click();
             }
-            int counter = 100;
             bool logined = false;
             while (counter > 0)
             {
@@ -120,10 +137,7 @@ namespace SmzdmBot
             }
             if (logined)
             {
-                if (Punch(driver))
-                {
-                    driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
-                }
+                signed = logined;
                 return true;
             }
             else
@@ -143,7 +157,7 @@ namespace SmzdmBot
            
         }
 
-        private bool Punch(IWebDriver driver)
+        public bool Punch()
         {
             int counter = 0;
             while (counter < 3)
@@ -399,6 +413,48 @@ namespace SmzdmBot
             }
             //Console.WriteLine("Gold Left " + goldText);
         }
+        public void NewLike()
+        {
+            driver.Navigate().GoToUrl("https://www.smzdm.com/");
+            //var toMove = driver.FindElement(By.ClassName("handover-sort"));
+            //IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            //js.ExecuteScript("window.scrollTo(0, document.body.scrollHeight)");
+            var title = driver.FindElement(By.ClassName("subtitle"));
+            var script = "arguments[0].scrollIntoView(true);";
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            js.ExecuteScript(script, title);
+            driver.FindElement(By.ClassName("r")).Click();
+            Thread.Sleep(3000);
+            //"feed-row-wide"
+            var toClicks = driver.FindElements(By.ClassName("z-feed-content")).ToList();
+            Console.WriteLine("Count " +toClicks.Count);
+            foreach(var element in toClicks)
+            {
+                Actions action = new Actions(driver);
+                ////action.MoveToElement(element).Perform();
+                //Thread.Sleep(1000);
+                js.ExecuteScript(script, element);
+                try
+                {
+                    //WebDriverWait wait = new WebDriverWait(driver, System.TimeSpan.FromSeconds(10));
+                    element.FindElement(By.ClassName("icon-zhi-o-thin")).Click();
+                    Console.WriteLine("vote clicked");
+                    Thread.Sleep(1000);
+                    //element.FindElement(By.ClassName("icon-star-o-thin")).Click();
+                    //Console.WriteLine("star clicked");
+                    //Thread.Sleep(4000);
+                }
+                catch(NoSuchElementException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                catch(ElementNotInteractableException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+        }
+        [Obsolete]
         public void Like(string Id= "2825621472")
         {
             var url = @"https://zhiyou.smzdm.com/member/"+Id+"/friendships/followers/";
@@ -414,32 +470,33 @@ namespace SmzdmBot
                 }
             }
             Console.WriteLine("total "+links.Count + " friends");
-            foreach(var link in links)
-            {
-                driver.Navigate().GoToUrl(link+ "baoliao/");
-                var items = driver.FindElements(By.ClassName("pandect-content-stuff")).ToList();
+            //foreach(var link in links)
+            //{
+                //driver.Navigate().GoToUrl(link+ "baoliao/");
+                //var items = driver.FindElements(By.ClassName("pandect-content-stuff")).ToList();
                 var itemLinkList = new List<string>();
-                foreach (var item in items)
-                {
-                    var timeStamp = item.FindElement(By.ClassName("pandect-content-time")).Text;
-                    if(timeStamp.Contains("前") || timeStamp.Contains("刚"))
-                    {
-                        var itemLink = item.FindElement(By.TagName("a")).GetAttribute("href");
-                        if (itemLink.StartsWith("https://www.smzdm.com/p/"))
-                        {
-                            itemLinkList.Add(itemLink);
-                        }
-                    }
-                    else if (timeStamp.Contains("-"))
-                    {
-                        var today = DateTime.Today;
-                        CultureInfo provider = CultureInfo.InvariantCulture;
-                        Console.WriteLine("'" + timeStamp + "'");
-                        DateTime date = DateTime.ParseExact(timeStamp.Split(' ')[0], "mm-dd", provider);
-                        var diff = (today - date).Days;
-                        Console.WriteLine(today.Day + " " + date.Day + " " + diff);
-                    }
-                }
+                itemLinkList.Add("https://www.smzdm.com/p/19177437/");
+                //foreach (var item in items)
+                //{
+                //    var timeStamp = item.FindElement(By.ClassName("pandect-content-time")).Text;
+                //    //if(timeStamp.Contains("前") || timeStamp.Contains("刚"))
+                //    //{
+                //        var itemLink = item.FindElement(By.TagName("a")).GetAttribute("href");
+                //        if (itemLink.StartsWith("https://www.smzdm.com/p/"))
+                //        {
+                //            itemLinkList.Add(itemLink);
+                //        }
+                //    //}
+                //    else if (timeStamp.Contains("-"))
+                //    {
+                //        var today = DateTime.Today;
+                //        CultureInfo provider = CultureInfo.InvariantCulture;
+                //        Console.WriteLine("'" + timeStamp + "'");
+                //        DateTime date = DateTime.ParseExact(timeStamp.Split(' ')[0], "mm-dd", provider);
+                //        var diff = (today - date).Days;
+                //        Console.WriteLine(today.Day + " " + date.Day + " " + diff);
+                //    }
+                //}
                 foreach(var itemLink in itemLinkList)
                 {
                     driver.Navigate().GoToUrl(itemLink);
@@ -450,12 +507,36 @@ namespace SmzdmBot
                     var worthV = double.Parse(worth);
                     var unWorthV = double.Parse(unWorth);
                     
-                    if (worthV<=3 || (unWorthV>0 && worthV / (worthV+unWorthV) <= 0.6))
-                    {
-                        driver.FindElement(By.Id("rating_worthy_num")).Click();
-                        Console.WriteLine("Worth Clicked");
-                    }
-                    var counter = GetFaverCount(driver);
+                    //if (worthV<=3 || (unWorthV>0 && worthV / (worthV+unWorthV) <= 0.6))
+                    //{
+                        Thread.Sleep(2000);
+                        var element1 = driver.FindElement(By.ClassName("interests-statement"));
+                        var element = driver.FindElement(By.Id("rating_worthy_num"));
+                        //var element = driver.FindElement(By.Id("identifier"));
+                        var script = "arguments[0].scrollIntoView(true);";
+                        IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                        js.ExecuteScript(script, element1);
+                //Actions actions = new Actions(driver);
+                //actions.MoveToElement(element);
+                //actions.Perform();
+                //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+                //var element = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("rating_worthy_num")));
+
+                Actions action = new Actions(driver);
+                        //action.MoveToElement(element).Perform();
+                
+                action.MoveToElement(element).Click(element).Build().Perform();
+                Thread.Sleep(2000);
+                element.Click();
+                Console.WriteLine("Worth Clicked");
+                Thread.Sleep(2000);
+                element.Click();
+                Console.WriteLine("Worth Clicked");
+                Thread.Sleep(2000);
+                element.Click();
+                Console.WriteLine("Worth Clicked");
+                //}
+                var counter = GetFaverCount(driver);
                     if (counter !=null)
                     {
                         var mark = driver.FindElement(By.ClassName("icon-star-o"));
@@ -469,7 +550,7 @@ namespace SmzdmBot
                             mark.Click();
                             Console.WriteLine("Current Favor Count " + int.Parse(counter.Text));
                         }
-                    }
+                    //}
                 }
                 break;
             }

@@ -13,11 +13,11 @@ using System.Threading.Tasks;
 
 namespace SmzdmBot
 {
-    public class DealSearchBot
+    public class DealFinder
     {
         bool login = false;
         public IWebDriver driver;
-        public DealSearchBot(Option option)
+        public DealFinder(Option option)
         {
             if (option.Browser == "firefox")
             {
@@ -28,6 +28,10 @@ namespace SmzdmBot
                 driver = new ChromeDriver();
             }
             //driver = new ChromeDriver();
+        }
+        public void Shutdown()
+        {
+            this.driver.Close();
         }
         public List<string> GetItemIdFromWikiPage(string wikiPage)
         {
