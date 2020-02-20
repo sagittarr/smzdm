@@ -30,13 +30,14 @@ namespace SmzdmBot
             if (!publisher.Login()) return;
             publisher.Punch();
             publisher.driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
-            while (publisher.baoLiaoLeft != 0)
+            while (publisher ==  null || publisher.baoLiaoLeft != 0)
             {
                 String content;
                 using (StreamReader reader = File.OpenText(taskPath))
                 {
-                    Console.WriteLine("Opened file.");
+                    //Console.WriteLine("Opened file.");
                     content = await reader.ReadToEndAsync();
+                    Console.WriteLine(content);
                 }
                 content = ProcessTask(content, out Tuple<string, int> task);
                 await WriteFileAsync(taskPath, content);
