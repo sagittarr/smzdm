@@ -47,12 +47,12 @@ namespace SmzdmBot
         //    this.option = opt;
         //}
 
-        public void TransferGoldAndLogStatus()
+        public void LogStatus()
         {
-            if (!String.IsNullOrWhiteSpace(option.GoldTransferTarget))
-            {
-                this.TransferGold(option.GoldTransferTarget);
-            }
+            //if (!String.IsNullOrWhiteSpace(option.GoldTransferTarget))
+            //{
+            //    this.TransferGold(option.GoldTransferTarget);
+            //}
             var status = getStatus();
             Console.WriteLine(status);
 
@@ -313,9 +313,85 @@ namespace SmzdmBot
             }
             return int.Parse(num);
         }
-        public  void ScrollIntoView(IWebElement ele)
+
+        public void TransferGold2(string url)
         {
-            ((IJavaScriptExecutor)driver).ExecuteScript("window.scrollTo(" + ele.Location.X + "," + ele.Location.Y + ")");
+            driver.Navigate().GoToUrl(url);
+            var infoBox = driver.FindElement(By.ClassName("info-box"));
+            var script = "arguments[0].scrollIntoView(true);";
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            js.ExecuteScript(script, infoBox);
+            Thread.Sleep(1000);
+            var buttons = driver.FindElements(By.ClassName("btn-group"));
+            //using (StreamWriter outputFile = new StreamWriter(@"C:\Users\jiatwang\Documents\output.txt"))
+            //{
+            //    outputFile.WriteLine(button.Text);
+            //}
+            //Console.WriteLine(button.Text);
+            foreach(var button in buttons)
+            {
+                if (button.Text.Contains("打赏"))
+                {
+                    var elements = button.FindElements(By.TagName("span"));
+                    foreach (var ele in elements)
+                    {
+                        Console.WriteLine(ele.Text);
+                        if (ele.Text.Contains("打赏"))
+                        {
+                            var count = 0;
+                            while (count < 4)
+                            {
+                                count++;
+                                ele.Click();
+                                Console.WriteLine("button clicked");
+                                Thread.Sleep(1000);
+                                var gratuity = driver.FindElement(By.ClassName("gratuity-option"));
+                                var labels = gratuity.FindElements(By.TagName("label"));
+                                var silver = -1;
+                                var gold = 0;
+                                foreach (var l in labels)
+                                {
+                                    if (silver == -1)
+                                    {
+                                        silver = GetNumber(l.Text);
+                                    }
+                                    else
+                                    {
+                                        gold = GetNumber(l.Text);
+                                    }
+
+                                }
+                                Console.WriteLine("s:" + silver);
+                                Console.WriteLine("g:" + gold);
+                                if (silver > 0)
+                                {
+                                    driver.FindElement(By.Id("broken_silver")).Click();
+                                    Console.WriteLine("Silver Selected");
+                                    var amount = silver;
+                                    Thread.Sleep(1000);
+                                    Pay(amount);
+                                    Thread.Sleep(4000);
+                                }
+                                if (gold > 0)
+                                {
+                                    driver.FindElement(By.Id("gold")).Click();
+                                    Console.WriteLine("Gold Selected");
+                                    var amount = gold >= 49 ? 49 : gold;
+                                    Thread.Sleep(1000);
+                                    Pay(amount);
+                                    Thread.Sleep(4000);
+                                }
+                                else
+                                {
+                                    return;
+                                }
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+
         }
         private void Pay(int gold)
         {
@@ -360,59 +436,59 @@ namespace SmzdmBot
                 }
             }
         }
-        public void TransferGold(string url)
-        {
-            driver.Navigate().GoToUrl(url);
-            var count = 0;
-            //security-input
-            while (count<4)
-            {
-                count++;
-                var feed = driver.FindElement(By.Id("feed-side"));
-                var spans = feed.FindElements(By.TagName("span"));
-                foreach (var span in spans)
-                {
-                    if (span.Text == "打赏")
-                    {
-                        span.Click();
-                    }
-                }
-                Thread.Sleep(1000);
-                var gratuity = driver.FindElement(By.ClassName("gratuity-option"));
-                var labels = gratuity.FindElements(By.TagName("label"));
-                var silver = -1;
-                var gold = 0;
-                foreach (var l in labels)
-                {
-                    if (silver == -1)
-                    {
-                        silver = GetNumber(l.Text);
-                    }
-                    else
-                    {
-                        gold = GetNumber(l.Text);
-                    }
+        //public void TransferGold(string url)
+        //{
+        //    driver.Navigate().GoToUrl(url);
+        //    var count = 0;
+        //    //security-input
+        //    while (count<4)
+        //    {
+        //        count++;
+        //        var feed = driver.FindElement(By.Id("feed-side"));
+        //        var spans = feed.FindElements(By.TagName("span"));
+        //        foreach (var span in spans)
+        //        {
+        //            if (span.Text == "打赏")
+        //            {
+        //                span.Click();
+        //            }
+        //        }
+        //        Thread.Sleep(1000);
+        //        var gratuity = driver.FindElement(By.ClassName("gratuity-option"));
+        //        var labels = gratuity.FindElements(By.TagName("label"));
+        //        var silver = -1;
+        //        var gold = 0;
+        //        foreach (var l in labels)
+        //        {
+        //            if (silver == -1)
+        //            {
+        //                silver = GetNumber(l.Text);
+        //            }
+        //            else
+        //            {
+        //                gold = GetNumber(l.Text);
+        //            }
 
-                }
-                Console.WriteLine(silver);
-                Console.WriteLine(gold);
+        //        }
+        //        Console.WriteLine(silver);
+        //        Console.WriteLine(gold);
 
-                if (gold > 5)
-                {
-                    driver.FindElement(By.Id("gold")).Click();
-                    Console.WriteLine("Gold Selected");
-                    var amount = gold >= 49 ? 49 : gold;
-                    Thread.Sleep(1000);
-                    Pay(amount);
-                    Thread.Sleep(4000);
-                }
-                else
-                {
-                    break;
-                }
-            }
-            //Console.WriteLine("Gold Left " + goldText);
-        }
+        //        if (gold > 0)
+        //        {
+        //            driver.FindElement(By.Id("gold")).Click();
+        //            Console.WriteLine("Gold Selected");
+        //            var amount = gold >= 49 ? 49 : gold;
+        //            Thread.Sleep(1000);
+        //            Pay(amount);
+        //            Thread.Sleep(4000);
+        //        }
+        //        else
+        //        {
+        //            break;
+        //        }
+        //    }
+        //    //Console.WriteLine("Gold Left " + goldText);
+        //}
         public void NewLike()
         {
             driver.Navigate().GoToUrl("https://www.smzdm.com/");
@@ -453,120 +529,6 @@ namespace SmzdmBot
                     Console.WriteLine(e.Message);
                 }
             }
-        }
-        [Obsolete]
-        public void Like(string Id= "2825621472")
-        {
-            var url = @"https://zhiyou.smzdm.com/member/"+Id+"/friendships/followers/";
-            driver.Navigate().GoToUrl(url);
-            var friends = driver.FindElements(By.ClassName("user-avatar")).ToList();
-            var links = new List<string>();
-            foreach(var element in friends)
-            {
-                var link = element.GetAttribute("href");
-                if (link.StartsWith("https://zhiyou.smzdm.com/member/"))
-                {
-                    links.Add(link);
-                }
-            }
-            Console.WriteLine("total "+links.Count + " friends");
-            //foreach(var link in links)
-            //{
-                //driver.Navigate().GoToUrl(link+ "baoliao/");
-                //var items = driver.FindElements(By.ClassName("pandect-content-stuff")).ToList();
-                var itemLinkList = new List<string>();
-                itemLinkList.Add("https://www.smzdm.com/p/19177437/");
-                //foreach (var item in items)
-                //{
-                //    var timeStamp = item.FindElement(By.ClassName("pandect-content-time")).Text;
-                //    //if(timeStamp.Contains("前") || timeStamp.Contains("刚"))
-                //    //{
-                //        var itemLink = item.FindElement(By.TagName("a")).GetAttribute("href");
-                //        if (itemLink.StartsWith("https://www.smzdm.com/p/"))
-                //        {
-                //            itemLinkList.Add(itemLink);
-                //        }
-                //    //}
-                //    else if (timeStamp.Contains("-"))
-                //    {
-                //        var today = DateTime.Today;
-                //        CultureInfo provider = CultureInfo.InvariantCulture;
-                //        Console.WriteLine("'" + timeStamp + "'");
-                //        DateTime date = DateTime.ParseExact(timeStamp.Split(' ')[0], "mm-dd", provider);
-                //        var diff = (today - date).Days;
-                //        Console.WriteLine(today.Day + " " + date.Day + " " + diff);
-                //    }
-                //}
-                foreach(var itemLink in itemLinkList)
-                {
-                    driver.Navigate().GoToUrl(itemLink);
-                    var worth = driver.FindElement(By.Id("rating_worthy_num")).Text;
-                    var unWorth = driver.FindElement(By.Id("rating_unworthy_num")).Text;
-                    
-                    Console.WriteLine(worth + ":" + unWorth);
-                    var worthV = double.Parse(worth);
-                    var unWorthV = double.Parse(unWorth);
-                    
-                    //if (worthV<=3 || (unWorthV>0 && worthV / (worthV+unWorthV) <= 0.6))
-                    //{
-                        Thread.Sleep(2000);
-                        var element1 = driver.FindElement(By.ClassName("interests-statement"));
-                        var element = driver.FindElement(By.Id("rating_worthy_num"));
-                        //var element = driver.FindElement(By.Id("identifier"));
-                        var script = "arguments[0].scrollIntoView(true);";
-                        IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-                        js.ExecuteScript(script, element1);
-                //Actions actions = new Actions(driver);
-                //actions.MoveToElement(element);
-                //actions.Perform();
-                //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-                //var element = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("rating_worthy_num")));
-
-                Actions action = new Actions(driver);
-                        //action.MoveToElement(element).Perform();
-                
-                action.MoveToElement(element).Click(element).Build().Perform();
-                Thread.Sleep(2000);
-                element.Click();
-                Console.WriteLine("Worth Clicked");
-                Thread.Sleep(2000);
-                element.Click();
-                Console.WriteLine("Worth Clicked");
-                Thread.Sleep(2000);
-                element.Click();
-                Console.WriteLine("Worth Clicked");
-                //}
-                var counter = GetFaverCount(driver);
-                    if (counter !=null)
-                    {
-                        var mark = driver.FindElement(By.ClassName("icon-star-o"));
-                        mark.Click();
-                        var count = int.Parse(counter.Text);
-                        Console.WriteLine("Current Favor Count " + count);
-                        var newCount = int.Parse(counter.Text);
-                        if (newCount < count)
-                        {
-                            Console.WriteLine("Current Favor Count " + newCount);
-                            mark.Click();
-                            Console.WriteLine("Current Favor Count " + int.Parse(counter.Text));
-                        }
-                    //}
-                }
-                break;
-            }
-        }
-        private IWebElement GetFaverCount(IWebDriver driver)
-        {
-            var divs = driver.FindElements(By.TagName("div"));
-            foreach (var div in divs)
-            {
-                var divTitle = div.GetAttribute("title");
-                if (divTitle == "收藏")
-                {
-                    return div.FindElement(By.TagName("span"));
-                }
-            }
-            return null;
         }
         private bool CheckFrequecyNotice()
         {

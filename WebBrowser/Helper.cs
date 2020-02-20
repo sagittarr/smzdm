@@ -30,6 +30,7 @@ namespace SmzdmBot
         public double PriceRate = 1.0;
         public string Browser = "firefox";
         public string GoldTransferTarget { get; set; }
+        public string Mode { get; set; }
         private static Dictionary<string, string>  HotPickCategoryMap = new Dictionary<string, string>();
         public Option()
         {
@@ -62,6 +63,7 @@ namespace SmzdmBot
 
             PriceRate = account.discountRate;
             HotPickCategory = account.category;
+            Mode = account.mode;
         }
         public Option(string[] args)
         {

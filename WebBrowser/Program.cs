@@ -73,7 +73,8 @@ namespace SmzdmBot
         }
         static void Main(string[] args)
         {
-            TaskManager.LoadTasks(args, @"C:\Users\jiatwang\Documents\test.txt").Wait();
+            TaskManager.Start(args, @"C:\Users\jiatwang\Documents\smzdm_config\task.txt", @"C:\Users\jiatwang\Documents\smzdm_config\payee.txt").Wait();
+            
             return;
             var arguments = File.ReadAllText(args[0]); ;
             var account = JsonConvert.DeserializeObject<Account>(arguments);
@@ -163,7 +164,7 @@ namespace SmzdmBot
                 }
                 //helper.Like();
                 Console.WriteLine("Finished.");
-                helper.TransferGoldAndLogStatus();
+                helper.LogStatus();
                 if (helper.gold > 1)
                 {
                     Console.WriteLine(option.username + " gold=" + helper.gold);
@@ -220,7 +221,7 @@ namespace SmzdmBot
                         //}
                     }
                     Console.WriteLine("Finished.");
-                    helper.TransferGoldAndLogStatus();
+                    helper.LogStatus();
                     if (helper.gold > 1)
                     {
                         Console.WriteLine(option.username + " gold=" + helper.gold);
@@ -331,7 +332,7 @@ namespace SmzdmBot
 
                 }
                 Console.WriteLine("Finished.");
-                helper.TransferGoldAndLogStatus();
+                helper.LogStatus();
                 if (helper.gold > 1)
                 {
                     Console.WriteLine(option.username + " gold=" + helper.gold);
@@ -350,7 +351,7 @@ namespace SmzdmBot
                     return;
                 }
                 helper.ReadInfo();
-                helper.TransferGoldAndLogStatus();
+                helper.LogStatus();
                 if (helper.gold > 1)
                 {
                     Console.WriteLine(option.username + " gold=" + helper.gold);

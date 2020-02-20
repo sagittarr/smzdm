@@ -15,60 +15,83 @@ namespace SmzdmBot
     {
         static async Task WriteFileAsync(string path, string content)
         {
-            Console.WriteLine("Async Write File has started");
+            //Console.WriteLine("Async Write File has started");
             using (StreamWriter outputFile = new StreamWriter(path))
             {
                 await outputFile.WriteAsync(content);
             }
-            Console.WriteLine("Async Write File has completed");
+            //Console.WriteLine("Async Write File has completed");
         }
-        public static async Task LoadTasks(string[] args, string taskPath)
+        public static async Task Start(string[] args, string taskPath, string payeePath)
         {
             var opt = LoadOption(args);
-            DealFinder finder = new DealFinder(opt);
             DealPublisher publisher = new DealPublisher(opt);
+            if(opt.Mode == "login")
+            {
+                publisher.Login();
+            }
+            else if(opt.Mode == "pay")
+            {
+                publisher.Login();
+                TransferGold(publisher, payeePath);
+            }
+            else if(opt.Mode == "smzdm_share")
+            {
+                DealFinder finder = new DealFinder(opt);
+                while (publisher.baoLiaoLeft != 0)
+                {
+                    String content;
+                    using (StreamReader reader = File.OpenText(taskPath))
+                    {
+                        //Console.WriteLine("Opened file.");
+                        content = await reader.ReadToEndAsync();
+                        //Console.WriteLine(content);
+                    }
+                    content = ProcessTask(content, out Tuple<string, int> task);
+                    await WriteFileAsync(taskPath, content);
+                    Console.WriteLine("Write done.");
+                    opt.HotPickCategory = task.Item1;
+                    Console.WriteLine(opt.HotPickCategory);
+                    var urlroot = opt.ConvertHotPickCategory(opt.HotPickCategory);
+                    if (urlroot == null) return;
+                    var pageUrl = urlroot + task.Item2.ToString() + "/";
+                    if (publisher.signed || publisher.Login())
+                    {
+                        publisher.Punch();
+                        publisher.driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
+                        FindDealAndPublish(opt, pageUrl, finder, publisher);
+                    }
+                }
+                finder.driver.Quit();
+                publisher.NewLike();
+                TransferGold(publisher, payeePath);
+            }
 
-            while (publisher.baoLiaoLeft != 0)
+
+            publisher.LogStatus();
+            publisher.driver.Quit();
+        }
+        static void TransferGold(DealPublisher publisher, string payeePath)
+        {
+            using (StreamReader reader = File.OpenText(payeePath))
             {
-                String content;
-                using (StreamReader reader = File.OpenText(taskPath))
+                var payee = reader.ReadToEnd();
+                var payeeList = payee.Split('\n');
+                Console.WriteLine(payeeList[0]);
+                try
                 {
-                    //Console.WriteLine("Opened file.");
-                    content = await reader.ReadToEndAsync();
-                    //Console.WriteLine(content);
+                    publisher.TransferGold2(payeeList[0]);
                 }
-                content = ProcessTask(content, out Tuple<string, int> task);
-                await WriteFileAsync(taskPath, content);
-                Console.WriteLine("Write done.");
-                opt.HotPickCategory = task.Item1;
-                Console.WriteLine(opt.HotPickCategory);
-                var urlroot = opt.ConvertHotPickCategory(opt.HotPickCategory);
-                if (urlroot == null) return;
-                var pageUrl =  urlroot + task.Item2.ToString() + "/";
-                if (publisher.signed || publisher.Login())
+                catch (NoSuchElementException e)
                 {
-                    publisher.Punch();
-                    publisher.driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
-                    Run(opt, pageUrl, finder, publisher);
+                    Console.WriteLine(e.Message);
                 }
-            }
-            finder.driver.Quit();
-            publisher.NewLike();
-            publisher.TransferGoldAndLogStatus();
-            if (publisher.gold > 1)
-            {
-                Console.WriteLine(opt.username + " gold=" + publisher.gold);
-                //helper.TransferGold("https://post.smzdm.com/p/amm539rz/");
-            }
-            else
-            {
-                publisher.driver.Quit();
             }
         }
         static string ProcessTask(string content, out Tuple<string, int> task)
         {
             var lines = content.Split('\n').ToList();
-            //Console.WriteLine("Read " + status);
+            Console.WriteLine(content);
             var orderText = lines[0].TrimEnd().TrimEnd('\n');
             var categoryIdx = int.Parse(lines[1]);
             var pageNumber = int.Parse(lines[2]);
@@ -82,7 +105,7 @@ namespace SmzdmBot
             }
             if (pageNumber >= 250)//end 
             {
-                pageNumber = 50;//start
+                pageNumber = 40;//start
             }
             return orderText + "\n" + categoryIdx + "\n" + pageNumber;
         }
@@ -96,10 +119,8 @@ namespace SmzdmBot
             //Console.OutputEncoding = System.Text.Encoding.UTF8;
             return option;
         }
-        static void Run(Option option, string pageUrl, DealFinder dealFinder, DealPublisher publisher)
+        static void FindDealAndPublish(Option option, string pageUrl, DealFinder dealFinder, DealPublisher publisher)
         {
-
-
             var smzdmItemList = new List<Dictionary<string, string>>();
             dealFinder.driver.Navigate().GoToUrl(pageUrl);
             var items = dealFinder.driver.FindElements(By.ClassName("z-feed-content")).ToList();
