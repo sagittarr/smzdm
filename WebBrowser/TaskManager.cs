@@ -27,10 +27,8 @@ namespace SmzdmBot
             var opt = LoadOption(args);
             DealFinder finder = new DealFinder(opt);
             DealPublisher publisher = new DealPublisher(opt);
-            if (!publisher.Login()) return;
-            publisher.Punch();
-            publisher.driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
-            while (publisher ==  null || publisher.baoLiaoLeft != 0)
+
+            while (publisher.baoLiaoLeft != 0)
             {
                 String content;
                 using (StreamReader reader = File.OpenText(taskPath))
@@ -47,7 +45,12 @@ namespace SmzdmBot
                 var urlroot = opt.ConvertHotPickCategory(opt.HotPickCategory);
                 if (urlroot == null) return;
                 var pageUrl =  urlroot + task.Item2.ToString() + "/";
-                Run(opt, pageUrl, finder, publisher);
+                if (publisher.signed || publisher.Login())
+                {
+                    publisher.Punch();
+                    publisher.driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
+                    Run(opt, pageUrl, finder, publisher);
+                }
             }
             finder.driver.Quit();
             publisher.NewLike();
