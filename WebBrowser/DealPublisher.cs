@@ -110,7 +110,7 @@ namespace SmzdmBot
             driver.FindElement(By.Id("password")).Click();
             Thread.Sleep(505);
             driver.FindElement(By.Id("password")).SendKeys(option.password);
-            Thread.Sleep(3043);
+            Thread.Sleep(1000);
             var login = driver.FindElement(By.Id("login_submit"));
             if (login != null)
             {

@@ -37,13 +37,16 @@ namespace SmzdmBot
                 {
                     //Console.WriteLine("Opened file.");
                     content = await reader.ReadToEndAsync();
-                    Console.WriteLine(content);
+                    //Console.WriteLine(content);
                 }
                 content = ProcessTask(content, out Tuple<string, int> task);
                 await WriteFileAsync(taskPath, content);
                 Console.WriteLine("Write done.");
                 opt.HotPickCategory = task.Item1;
-                var pageUrl = opt.ConvertHotPickCategory(opt.HotPickCategory) + task.Item2.ToString() + "/";
+                Console.WriteLine(opt.HotPickCategory);
+                var urlroot = opt.ConvertHotPickCategory(opt.HotPickCategory);
+                if (urlroot == null) return;
+                var pageUrl =  urlroot + task.Item2.ToString() + "/";
                 Run(opt, pageUrl, finder, publisher);
             }
             finder.driver.Quit();
@@ -90,17 +93,17 @@ namespace SmzdmBot
             //Console.OutputEncoding = System.Text.Encoding.UTF8;
             return option;
         }
-        static void Run(Option option, string pageUrl, DealFinder searchBot, DealPublisher worker)
+        static void Run(Option option, string pageUrl, DealFinder dealFinder, DealPublisher publisher)
         {
 
 
             var smzdmItemList = new List<Dictionary<string, string>>();
-            searchBot.driver.Navigate().GoToUrl(pageUrl);
-            var items = searchBot.driver.FindElements(By.ClassName("z-feed-content")).ToList();
+            dealFinder.driver.Navigate().GoToUrl(pageUrl);
+            var items = dealFinder.driver.FindElements(By.ClassName("z-feed-content")).ToList();
 
             foreach (IWebElement item in items)
             {
-                var it = searchBot.GetSmzdmItem(item);
+                var it = dealFinder.GetSmzdmItem(item);
                 if (it != null)
                 {
                     smzdmItemList.Add(it);
@@ -111,14 +114,14 @@ namespace SmzdmBot
             Console.WriteLine("Collected good price count " + smzdmItemList.Count);
             foreach (var it in smzdmItemList)
             {
-                var price = searchBot.CheckSmzdmItem(it);
+                var price = dealFinder.CheckSmzdmItem(it);
                 if (price != null)
                 {
                     price.Calculate();
                     var goodPrice = price.SmzdmGoodPrice;
                     var sourceUrl = price.sourceUrl;
-                    var code = worker.PasteItemUrl(sourceUrl, 0, option.waitBaoliao, option.baoLiaoStopNumber);
-                    if (code == 1) worker.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, option.PriceRate, 0.0, price);
+                    var code = publisher.PasteItemUrl(sourceUrl, 0, option.waitBaoliao, option.baoLiaoStopNumber);
+                    if (code == 1) publisher.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, option.PriceRate, 0.0, price);
                     else if (code == 2)
                     {
                         break;
@@ -127,7 +130,7 @@ namespace SmzdmBot
             }
 
             Console.WriteLine(option.HotPickCategory + " "+ pageUrl + " Task Finished");
-            Console.WriteLine("baoliao left " + worker.baoLiaoLeft);
+            Console.WriteLine("baoliao left " + publisher.baoLiaoLeft);
             //worker.TransferGoldAndLogStatus();
             //if (worker.gold > 1)
             //{

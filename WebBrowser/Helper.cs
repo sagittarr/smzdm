@@ -92,7 +92,15 @@ namespace SmzdmBot
                 HotPickCategoryMap.Add("suning", "https://search.smzdm.com/?c=faxian&s=苏宁数码&v=a&p=");
                 HotPickCategoryMap.Add("jingqi", "https://search.smzdm.com/?c=faxian&s=京奇宝物&v=b&p=");
             }
-            return HotPickCategoryMap[name];
+            if (HotPickCategoryMap.ContainsKey(name))
+            {
+                return HotPickCategoryMap[name];
+            }
+            else
+            {
+                Console.WriteLine("not found key '" + name + "'");
+                return null;
+            }
         }
     }
     public class Helper
