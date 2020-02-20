@@ -66,7 +66,7 @@ namespace SmzdmBot
         {
             var lines = content.Split('\n').ToList();
             //Console.WriteLine("Read " + status);
-            var orderText = lines[0];
+            var orderText = lines[0].TrimEnd().TrimEnd('\n');
             var categoryIdx = int.Parse(lines[1]);
             var pageNumber = int.Parse(lines[2]);
             var order = orderText.Split(',').ToList();
