@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SmzdmBot
@@ -37,37 +38,51 @@ namespace SmzdmBot
             }
             else if(opt.Mode == "smzdm_share")
             {
-                DealFinder finder = new DealFinder(opt);
-                while (publisher.baoLiaoLeft != 0)
+                publisher.Login();
+                publisher.driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
+                Thread.Sleep(5000);
+                publisher.ReadInfo();
+                if(publisher.baoLiaoLeft != 0)
                 {
-                    String content;
-                    using (StreamReader reader = File.OpenText(taskPath))
+                    DealFinder finder = new DealFinder(opt);
+                    while (publisher.baoLiaoLeft != 0)
                     {
-                        //Console.WriteLine("Opened file.");
-                        content = await reader.ReadToEndAsync();
-                        //Console.WriteLine(content);
+                        String content;
+                        using (StreamReader reader = File.OpenText(taskPath))
+                        {
+                            //Console.WriteLine("Opened file.");
+                            content = await reader.ReadToEndAsync();
+                            //Console.WriteLine(content);
+                        }
+                        content = ProcessTask(content, out Tuple<string, int> task);
+                        await WriteFileAsync(taskPath, content);
+                        Console.WriteLine("Write done.");
+                        opt.HotPickCategory = task.Item1;
+                        Console.WriteLine(opt.HotPickCategory);
+                        var urlroot = opt.ConvertHotPickCategory(opt.HotPickCategory);
+                        if (urlroot == null) return;
+                        var pageUrl = urlroot + task.Item2.ToString() + "/";
+                        try { 
+                            FindDealAndPublish(opt, pageUrl, finder, publisher);
+                        }
+                        catch (WebDriverException e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
                     }
-                    content = ProcessTask(content, out Tuple<string, int> task);
-                    await WriteFileAsync(taskPath, content);
-                    Console.WriteLine("Write done.");
-                    opt.HotPickCategory = task.Item1;
-                    Console.WriteLine(opt.HotPickCategory);
-                    var urlroot = opt.ConvertHotPickCategory(opt.HotPickCategory);
-                    if (urlroot == null) return;
-                    var pageUrl = urlroot + task.Item2.ToString() + "/";
-                    if (publisher.signed || publisher.Login())
-                    {
-                        publisher.Punch();
-                        publisher.driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
-                        FindDealAndPublish(opt, pageUrl, finder, publisher);
-                    }
+                    finder.driver.Quit();
                 }
-                finder.driver.Quit();
+            }
+            try
+            {
+                publisher.Punch();
                 publisher.NewLike();
                 TransferGold(publisher, payeePath);
             }
-
-
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
             publisher.LogStatus();
             publisher.driver.Quit();
         }
