@@ -90,7 +90,8 @@ namespace SmzdmBot
                 HotPickCategoryMap.Add("mother", temp + "s0f75t0b0d0r0p");
                 HotPickCategoryMap.Add("home", temp + "s0f37t0b0d0r0p");
                 HotPickCategoryMap.Add("things", temp + "s0f1515t0b0d0r0p");
-                HotPickCategoryMap.Add("cloth", temp + "s0f57t0b0d0r0p1");
+                HotPickCategoryMap.Add("cloth", temp + "s0f57t0b0d0r0p");
+                HotPickCategoryMap.Add("food", temp + "s0f95t0b0d0r0p");
                 HotPickCategoryMap.Add("suning", "https://search.smzdm.com/?c=faxian&s=苏宁数码&v=a&p=");
                 HotPickCategoryMap.Add("jingqi", "https://search.smzdm.com/?c=faxian&s=京奇宝物&v=b&p=");
             }
@@ -157,7 +158,7 @@ namespace SmzdmBot
             {
                 return "苏宁易购";
             }
-            else if(url.StartsWith(@"https://item.jd.com/") || url.StartsWith(@"https://item.jd.hk/") || url.StartsWith(@"https://re.jd.com/"))
+            else if (url.StartsWith(@"https://item.jd.com/") || url.StartsWith(@"https://item.jd.hk/") || url.StartsWith(@"https://re.jd.com/"))
             {
                 return "京东";
             }
@@ -178,6 +179,22 @@ namespace SmzdmBot
                 return "拼多多";
             }
             return "";
+        }
+        public static void CloseOtherTabs(IWebDriver driver){
+            String originalHandle = driver.CurrentWindowHandle;
+
+            //Do something to open new tabs
+
+            foreach (var handle in driver.WindowHandles)
+            {
+                if (handle !=originalHandle)
+                {
+                    driver.SwitchTo().Window(handle);
+                    driver.Close();
+                }
+            }
+
+            driver.SwitchTo().Window(originalHandle);
         }
         public static string CheckUrl(string url)
         {

@@ -12,65 +12,6 @@ namespace SmzdmBot
 
     class Program
     {
-        private static Option BuildOption(string mode, string[] args)
-        {
-            Option option = new Option();
-            if (args.Length >= 1)
-            {
-                mode = args[0];
-                if (mode == "smzdm")
-                {
-                    option.output = args[1];
-                    option.pageNumbers = args[2];
-                }
-                else if (mode == "search")
-                {
-                    option.input = args[1];
-                    option.output = args[2];
-                }
-                else if (mode == "crawl")
-                {
-                    option.input = args[1];
-                    option.output = args[2];
-                    if (args.Length >= 4)
-                    {
-                        option.CrawlCount = int.Parse(args[3]);
-                    }
-
-                }
-                else if (mode == "login")
-                {
-                    option.username = args[1];
-                    option.password = args[2];
-                    option.output = args[3];
-                }
-                else if (mode == "share")
-                {
-                    option = new Option(args.Skip(1).ToArray());
-                }
-
-                else if (mode == "smzdm_share")
-                {
-                    option = new Option(args.Skip(1).ToArray());
-                    option.HotPickCategory = args[10];
-                    option.pageNumbers = args[11];
-                    option.PriceRate = Double.Parse(args[12]);
-                }
-                else if (mode == "wiki_share")
-                {
-                    option = new Option(args.Skip(1).ToArray());
-                    option.SmzdmWikiPages = args[10];
-                    if (args.Length >= 12) option.PriceRate = Double.Parse(args[11]);
-                }
-            }
-            else
-            {
-                Console.WriteLine("unknown command");
-                Console.ReadKey();
-                return null;
-            }
-            return option;
-        }
         static void Main(string[] args)
         {
             TaskManager.Start(args, @"C:\Users\jiatwang\Documents\smzdm_config\task.txt", @"C:\Users\jiatwang\Documents\smzdm_config\payee.txt").Wait();
@@ -148,7 +89,7 @@ namespace SmzdmBot
                 Console.WriteLine("Collected good price count " + smzdmItemList.Count);
                 foreach (var it in smzdmItemList)
                 {
-                    var price = bot.CheckSmzdmItem(it);
+                    var price = bot.CheckPrice(it);
                     if (price != null)
                     {
                         price.Calculate();
@@ -198,7 +139,7 @@ namespace SmzdmBot
                     }
                     foreach (var itemUrl in itemUrls)
                     {
-                        var price = bot.CheckSmzdmItem(bot.GetLinkFromWiki(itemUrl));
+                        var price = bot.CheckPrice(bot.GetLinkFromWiki(itemUrl));
                         if (price == null) continue;
                         //if (prices.Count > 1)
                         //{
@@ -342,28 +283,6 @@ namespace SmzdmBot
                     helper.Shutdown();
                 }
             }
-            else if (mode == "login")
-            {
-                var helper = new DealPublisher(option);
-                //if (!helper.Login())
-                if(!DealPublisher.LoginRetry(helper))
-                {
-                    return;
-                }
-                helper.ReadInfo();
-                helper.LogStatus();
-                if (helper.gold > 1)
-                {
-                    Console.WriteLine(option.username + " gold=" + helper.gold);
-                    //https://post.smzdm.com/p/awxqx3qm/
-                    //https://post.smzdm.com/p/amm539rz/
-                    //helper.TransferGold("https://post.smzdm.com/p/awxqx3qm/");
-                }
-                else
-                {
-                    helper.Shutdown();
-                }
-            }
             else
             {
                 Console.WriteLine("unknown mode " + mode);
@@ -371,64 +290,6 @@ namespace SmzdmBot
                 return;
             }
             return;
-        }
-        static void Run(Option option, DealFinder dealSeachBot, DealPublisher worker)
-        {
-                DealFinder searchBot = new DealFinder(option);
-                var pages = new List<string>();
-                var pageUrl = option.ConvertHotPickCategory(option.HotPickCategory);
-                pages.Add(pageUrl);
-                if (!worker.signed && !worker.Login())
-                {
-                    return;
-                }
-
-                var smzdmItemList = new List<Dictionary<string, string>>();
-                foreach (var page in pages)
-                {
-                    searchBot.driver.Navigate().GoToUrl(page);
-                    var items = searchBot.driver.FindElements(By.ClassName("z-feed-content")).ToList();
-
-                    foreach (IWebElement item in items)
-                    {
-                        var it = searchBot.GetSmzdmItem(item);
-                        if (it != null)
-                        {
-                            smzdmItemList.Add(it);
-                        }
-
-                    }
-                }
-                Console.WriteLine("Collected good price count " + smzdmItemList.Count);
-                foreach (var it in smzdmItemList)
-                {
-                    var price = searchBot.CheckSmzdmItem(it);
-                    if (price != null)
-                    {
-                        price.Calculate();
-                        var goodPrice = price.SmzdmGoodPrice;
-                        var sourceUrl = price.sourceUrl;
-                        var code = worker.PasteItemUrl(sourceUrl, 0, option.waitBaoliao, option.baoLiaoStopNumber);
-                        if (code == 1) worker.SubmitBaoLiao(option.descriptionMode, goodPrice, 0.0, sourceUrl, option.PriceRate, 0.0, price);
-                        else if (code == 2)
-                        {
-                            break;
-                        }
-                    }
-                }
-                //helper.Like();
-                //Console.WriteLine("Finished.");
-                //worker.TransferGoldAndLogStatus();
-                //if (worker.gold > 1)
-                //{
-                //    Console.WriteLine(option.username + " gold=" + worker.gold);
-                //    //helper.TransferGold("https://post.smzdm.com/p/amm539rz/");
-                //}
-                //else
-                //{
-                //    worker.Shutdown();
-                //}
-                //return;
         }
     }
 }

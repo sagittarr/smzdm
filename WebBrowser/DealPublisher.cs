@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
@@ -41,19 +42,9 @@ namespace SmzdmBot
             option = opt;
         }
 
-        //public SmzdmWorker(Option opt, FirefoxDriver driver)
-        //{
-        //    this.driver = driver;
-        //    this.option = opt;
-        //}
-
         public void LogStatus()
         {
-            //if (!String.IsNullOrWhiteSpace(option.GoldTransferTarget))
-            //{
-            //    this.TransferGold(option.GoldTransferTarget);
-            //}
-            var status = getStatus();
+            var status = GetStatus();
             Console.WriteLine(status);
 
             var arr = status.Replace("\r", "").Split('\n');
@@ -85,21 +76,6 @@ namespace SmzdmBot
             account.BaoLiaoLeftCount = baoLiaoLeft;
             account.GoldLeft = gold;
             File.AppendAllText(option.StatusFilePath, JsonConvert.SerializeObject(account) + "\n");
-        }
-        public static bool LoginRetry(DealPublisher worker, int retry = 8)
-        {
-            int count = 0;
-            while (!worker.Login(3))
-            {
-                worker.Shutdown();
-                worker = new DealPublisher(worker.option);
-                count++;
-                if (count >= retry)
-                {
-                    return false;
-                }
-            }
-            return true;
         }
         public bool Login(int counter = 100)
         {
@@ -144,17 +120,7 @@ namespace SmzdmBot
             {
                 Console.WriteLine("Login timeout");
                 return false;
-            }
-            //Console.WriteLine("Type Y to continue, after human check.");
-            //if (Console.ReadLine().ToLower().Contains("y"))
-            //{
-            //    driver.Navigate().GoToUrl(@"https://www.smzdm.com/");
-            //    driver.FindElement(By.ClassName("J_punch")).Click();
-            //    Console.WriteLine("Check in punched.");
-            //    driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
-            //    return true;
-            //}
-           
+            }           
         }
 
         public bool Punch()
@@ -193,11 +159,11 @@ namespace SmzdmBot
             {
 
                 Console.WriteLine("current category is " + type1 + " "+ type2 + " "+ type3 + " "+ type4);
-                if (type1 != null && type1.Contains("服饰鞋包"))
-                {
-                    Console.WriteLine("Skip clothes category");
-                    return true;
-                }
+                //if (type1 != null && type1.Contains("服饰鞋包"))
+                //{
+                //    Console.WriteLine("Skip clothes category");
+                //    return true;
+                //}
                 var currentPrice = double.Parse(priceText);
                 priceText += currency;
                 Console.WriteLine(priceText);
@@ -436,65 +402,47 @@ namespace SmzdmBot
                 }
             }
         }
-        //public void TransferGold(string url)
-        //{
-        //    driver.Navigate().GoToUrl(url);
-        //    var count = 0;
-        //    //security-input
-        //    while (count<4)
-        //    {
-        //        count++;
-        //        var feed = driver.FindElement(By.Id("feed-side"));
-        //        var spans = feed.FindElements(By.TagName("span"));
-        //        foreach (var span in spans)
-        //        {
-        //            if (span.Text == "打赏")
-        //            {
-        //                span.Click();
-        //            }
-        //        }
-        //        Thread.Sleep(1000);
-        //        var gratuity = driver.FindElement(By.ClassName("gratuity-option"));
-        //        var labels = gratuity.FindElements(By.TagName("label"));
-        //        var silver = -1;
-        //        var gold = 0;
-        //        foreach (var l in labels)
-        //        {
-        //            if (silver == -1)
-        //            {
-        //                silver = GetNumber(l.Text);
-        //            }
-        //            else
-        //            {
-        //                gold = GetNumber(l.Text);
-        //            }
-
-        //        }
-        //        Console.WriteLine(silver);
-        //        Console.WriteLine(gold);
-
-        //        if (gold > 0)
-        //        {
-        //            driver.FindElement(By.Id("gold")).Click();
-        //            Console.WriteLine("Gold Selected");
-        //            var amount = gold >= 49 ? 49 : gold;
-        //            Thread.Sleep(1000);
-        //            Pay(amount);
-        //            Thread.Sleep(4000);
-        //        }
-        //        else
-        //        {
-        //            break;
-        //        }
-        //    }
-        //    //Console.WriteLine("Gold Left " + goldText);
-        //}
-        public void NewLike()
+        public void Follow()
+        {
+            driver.Navigate().GoToUrl("https://zhiyou.smzdm.com/member/8468814749/friendships/followers/");
+            var script = "arguments[0].scrollIntoView(true);";
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            var stop = false;
+            while (!stop) { 
+                var buttons = driver.FindElements(By.ClassName("focus-intro"));
+                foreach (var button in buttons)
+                {
+                    var spans = button.FindElements(By.TagName("span"));
+                    foreach (var span in spans)
+                    {
+                        if (span.Text.Contains("关注") && !span.Text.Contains("已"))
+                        {
+                            js.ExecuteScript(script, button);
+                            Thread.Sleep(2000);
+                            js.ExecuteScript("window.scrollBy(0,-100)");
+                            Thread.Sleep(2000);
+                            span.Click();
+                            Console.WriteLine("followed");
+                        }
+                    }
+                }
+                try
+                {
+                    var turn =driver.FindElement(By.ClassName("page-turn"));
+                    if(turn.Text == "下一页")
+                    {
+                        turn.Click();
+                        continue;
+                    }
+                }
+                catch (NoSuchElementException)
+                { }   
+                stop = true;
+            }
+        }
+        public void Like()
         {
             driver.Navigate().GoToUrl("https://www.smzdm.com/");
-            //var toMove = driver.FindElement(By.ClassName("handover-sort"));
-            //IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-            //js.ExecuteScript("window.scrollTo(0, document.body.scrollHeight)");
             var title = driver.FindElement(By.ClassName("subtitle"));
             var script = "arguments[0].scrollIntoView(true);";
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
@@ -506,9 +454,6 @@ namespace SmzdmBot
             Console.WriteLine("Count " +toClicks.Count);
             foreach(var element in toClicks)
             {
-                Actions action = new Actions(driver);
-                ////action.MoveToElement(element).Perform();
-                //Thread.Sleep(1000);
                 js.ExecuteScript(script, element);
                 try
                 {
@@ -661,7 +606,7 @@ namespace SmzdmBot
             return 0; // next item
         }
 
-        private string getStatus()
+        private string GetStatus()
         {
             driver.Navigate().GoToUrl("https://zhiyou.smzdm.com/user/");
             nickName = driver.FindElement(By.ClassName("info-stuff-nickname")).Text;

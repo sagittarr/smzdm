@@ -25,7 +25,9 @@ namespace SmzdmBot
         }
         public static async Task Start(string[] args, string taskPath, string payeePath)
         {
+            
             var opt = LoadOption(args);
+            Console.Title = opt.username;
             DealPublisher publisher = new DealPublisher(opt);
             if(opt.Mode == "login")
             {
@@ -73,10 +75,12 @@ namespace SmzdmBot
                     finder.driver.Quit();
                 }
             }
+            publisher.Follow();
             try
             {
+                
                 publisher.Punch();
-                publisher.NewLike();
+                publisher.Like();
                 TransferGold(publisher, payeePath);
             }
             catch (Exception e)
@@ -138,6 +142,7 @@ namespace SmzdmBot
         {
             var smzdmItemList = new List<Dictionary<string, string>>();
             dealFinder.driver.Navigate().GoToUrl(pageUrl);
+            //Helper.CloseOtherTabs(dealFinder.driver);
             var items = dealFinder.driver.FindElements(By.ClassName("z-feed-content")).ToList();
 
             foreach (IWebElement item in items)
@@ -153,7 +158,7 @@ namespace SmzdmBot
             Console.WriteLine("Collected good price count " + smzdmItemList.Count);
             foreach (var it in smzdmItemList)
             {
-                var price = dealFinder.CheckSmzdmItem(it);
+                var price = dealFinder.CheckPrice(it);
                 if (price != null)
                 {
                     price.Calculate();
@@ -170,17 +175,6 @@ namespace SmzdmBot
 
             Console.WriteLine(option.HotPickCategory + " "+ pageUrl + " Task Finished");
             Console.WriteLine("baoliao left " + publisher.baoLiaoLeft);
-            //worker.TransferGoldAndLogStatus();
-            //if (worker.gold > 1)
-            //{
-            //    Console.WriteLine(option.username + " gold=" + worker.gold);
-            //    //helper.TransferGold("https://post.smzdm.com/p/amm539rz/");
-            //}
-            //else
-            //{
-            //    worker.Shutdown();
-            //}
-            //return;
         }
     }
 }

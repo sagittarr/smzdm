@@ -132,11 +132,11 @@ namespace SmzdmBot
             var itemTitle = "";
             if (lines.Length >= 2)
             {
-                if (lines[0].IndexOf("件") != -1 || lines[1].IndexOf("合") != -1)
-                {
-                    Console.WriteLine("complicated price skip ");
-                    return null;
-                }
+                //if (lines[0].IndexOf("件") != -1 || lines[1].IndexOf("合") != -1)
+                //{
+                //    Console.WriteLine("complicated price skip ");
+                //    return null;
+                //}
                 int idx = lines[1].IndexOf("元");
                 if (idx != -1)
                 {
@@ -188,7 +188,7 @@ namespace SmzdmBot
             }
             return null;
         }
-        public Price CheckSmzdmItem(Dictionary<string, string> it)
+        public Price CheckPrice(Dictionary<string, string> it)
         {
             if (it == null) return null;
             if (Helper.ToUrl(driver, it["smzdmProduct"]))
@@ -235,6 +235,7 @@ namespace SmzdmBot
                                         break;
                                     }
                                 }
+                                //driver.Close();
                                 
                             }
                             

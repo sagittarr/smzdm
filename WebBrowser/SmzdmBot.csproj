@@ -86,6 +86,7 @@
   <ItemGroup>
     <Compile Include="CsvHelper.cs" />
     <Compile Include="DealFinder.cs" />
+    <Compile Include="DealPublisher - Copy.cs" />
     <Compile Include="ExcelManager.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="PhoneFinder.cs" />
