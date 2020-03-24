@@ -54,7 +54,7 @@
             this.textBox1.Size = new System.Drawing.Size(585, 29);
             this.textBox1.TabIndex = 1;
             this.textBox1.Text = "C:\\Users\\jiatwang\\Documents\\GitHub\\smzdm\\WebBrowser\\bin\\Release\\SmzdmBot.exe";
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            //this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // label1
             // 
@@ -74,7 +74,7 @@
             this.textBox3.Size = new System.Drawing.Size(583, 29);
             this.textBox3.TabIndex = 5;
             this.textBox3.Text = "C:\\Users\\jiatwang\\Documents\\GitHub\\smzdm_output.txt";
-            this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
+            //this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             // 
             // button1
             // 

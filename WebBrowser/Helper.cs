@@ -3,12 +3,29 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace SmzdmBot
 {
+    public class MyLogger
+    {
+        public static void LogWarnning(String text)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine(text);
+            Console.ResetColor();
+        }
+    }
+    public class AccountConfig
+    {
+        public string telelphone = "";
+        public string email = "";
+        public string password = "";
+        public string mode = "";
+    }
     public class Option
     {
         public string username = "";
@@ -29,6 +46,9 @@ namespace SmzdmBot
         public string SmzdmWikiPages { get; set; }
         public double PriceRate = 1.0;
         public string Browser = "firefox";
+        public string Payee = "";
+        public string Command = "";
+        public int Freq = 10;
         public string GoldTransferTarget { get; set; }
         public string Mode { get; set; }
         private static Dictionary<string, string>  HotPickCategoryMap = new Dictionary<string, string>();
@@ -79,6 +99,7 @@ namespace SmzdmBot
         }
         public string ConvertHotPickCategory(string name)
         {
+            name = name.Trim().Trim("\n".ToCharArray());
             var temp = "https://www.smzdm.com/jingxuan/xuan/";
             if (HotPickCategoryMap.Count == 0)
             {
@@ -92,8 +113,11 @@ namespace SmzdmBot
                 HotPickCategoryMap.Add("things", temp + "s0f1515t0b0d0r0p");
                 HotPickCategoryMap.Add("cloth", temp + "s0f57t0b0d0r0p");
                 HotPickCategoryMap.Add("food", temp + "s0f95t0b0d0r0p");
-                HotPickCategoryMap.Add("suning", "https://search.smzdm.com/?c=faxian&s=苏宁数码&v=a&p=");
-                HotPickCategoryMap.Add("jingqi", "https://search.smzdm.com/?c=faxian&s=京奇宝物&v=b&p=");
+                HotPickCategoryMap.Add("books", temp + "s0f7t0b0d0r0p");
+                HotPickCategoryMap.Add("gift", temp + "s0f131t0b0d0r0p");
+
+                HotPickCategoryMap.Add("office", @"https://www.smzdm.com/fenlei/bangongshebei/h1c3s0f0t0p");
+                //HotPickCategoryMap.Add("jingqi", "https://search.smzdm.com/?c=faxian&s=京奇宝物&v=b&p=");
             }
             if (HotPickCategoryMap.ContainsKey(name))
             {
@@ -108,6 +132,27 @@ namespace SmzdmBot
     }
     public class Helper
     {
+        public static async Task<string> OpenFile(string path, int retry=3, int timeSpan =3000)
+        {
+            var count = 0;
+            while (count < retry)
+            {
+                try
+                {
+                    using (StreamReader reader = File.OpenText(path))
+                    {
+                        return await reader.ReadToEndAsync();
+                    }
+                }
+                catch (IOException e)
+                {
+                    count++;
+                    MyLogger.LogWarnning(e.Message);
+                    await Task.Delay(timeSpan);
+                }
+            }
+            return null;
+        }
         public static bool ToUrl(IWebDriver driver, string url)
         {
             try
