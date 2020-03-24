@@ -42,7 +42,7 @@ namespace SmzdmBot
             option = opt;
         }
 
-        public void LogStatus()
+        public void LogStatus(string outputPath)
         {
             var status = GetStatus();
             Console.WriteLine(status);
@@ -75,52 +75,59 @@ namespace SmzdmBot
             account.Level = Level;
             account.BaoLiaoLeftCount = baoLiaoLeft;
             account.GoldLeft = gold;
-            File.AppendAllText(option.StatusFilePath, JsonConvert.SerializeObject(account) + "\n");
+            File.AppendAllText(outputPath, JsonConvert.SerializeObject(account) + "\n");
         }
         public bool Login(int counter = 100)
         {
-            driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
-            driver.Navigate().Refresh();
-            driver.FindElement(By.Id("username")).SendKeys(option.username); //"18604568194" smzdm24202@outlook.com
-            Thread.Sleep(1000);
-            driver.FindElement(By.Id("password")).Click();
-            Thread.Sleep(505);
-            driver.FindElement(By.Id("password")).SendKeys(option.password);
-            Thread.Sleep(1000);
-            var login = driver.FindElement(By.Id("login_submit"));
-            if (login != null)
+            try
             {
-                login.Click();
-            }
-            bool logined = false;
-            while (counter > 0)
-            {
-                counter--;
-                Console.Write(".");
-                Thread.Sleep(3000);
-                try
+                driver.Navigate().GoToUrl(@"https://www.smzdm.com/baoliao/?old");
+                driver.Navigate().Refresh();
+                driver.FindElement(By.Id("username")).SendKeys(option.username); //"18604568194" smzdm24202@outlook.com
+                Thread.Sleep(1000);
+                driver.FindElement(By.Id("password")).Click();
+                Thread.Sleep(505);
+                driver.FindElement(By.Id("password")).SendKeys(option.password);
+                Thread.Sleep(1000);
+                var login = driver.FindElement(By.Id("login_submit"));
+                if (login != null)
                 {
-                    driver.FindElement(By.Id("get_info_btn"));
-                    logined = true;
-                    Console.WriteLine("Login Successfully");
-                    break;
-
+                    login.Click();
                 }
-                catch (NoSuchElementException)
+                bool logined = false;
+                while (counter > 0)
                 {
+                    counter--;
+                    Console.Write(".");
+                    Thread.Sleep(3000);
+                    try
+                    {
+                        driver.FindElement(By.Id("get_info_btn"));
+                        logined = true;
+                        Console.WriteLine("Login Successfully");
+                        break;
 
+                    }
+                    catch (NoSuchElementException)
+                    {
+
+                    }
+                }
+                if (logined)
+                {
+                    signed = logined;
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("Login timeout");
+                    return false;
                 }
             }
-            if (logined)
+            catch(WebDriverException e)
             {
-                signed = logined;
-                return true;
+                return Login();
             }
-            else
-            {
-                Console.WriteLine("Login timeout");
-                return false;
-            }           
         }
 
         public bool Punch()
@@ -282,6 +289,7 @@ namespace SmzdmBot
 
         public void TransferGold2(string url)
         {
+            int waitTime = 10 * 1000;
             driver.Navigate().GoToUrl(url);
             var infoBox = driver.FindElement(By.ClassName("info-box"));
             var script = "arguments[0].scrollIntoView(true);";
@@ -289,11 +297,6 @@ namespace SmzdmBot
             js.ExecuteScript(script, infoBox);
             Thread.Sleep(1000);
             var buttons = driver.FindElements(By.ClassName("btn-group"));
-            //using (StreamWriter outputFile = new StreamWriter(@"C:\Users\jiatwang\Documents\output.txt"))
-            //{
-            //    outputFile.WriteLine(button.Text);
-            //}
-            //Console.WriteLine(button.Text);
             foreach(var button in buttons)
             {
                 if (button.Text.Contains("打赏"))
@@ -310,7 +313,7 @@ namespace SmzdmBot
                                 count++;
                                 ele.Click();
                                 Console.WriteLine("button clicked");
-                                Thread.Sleep(1000);
+                                Thread.Sleep(5000);
                                 var gratuity = driver.FindElement(By.ClassName("gratuity-option"));
                                 var labels = gratuity.FindElements(By.TagName("label"));
                                 var silver = -1;
@@ -334,18 +337,18 @@ namespace SmzdmBot
                                     driver.FindElement(By.Id("broken_silver")).Click();
                                     Console.WriteLine("Silver Selected");
                                     var amount = silver;
-                                    Thread.Sleep(1000);
+                                    Thread.Sleep(5000);
                                     Pay(amount);
-                                    Thread.Sleep(4000);
+                                    Thread.Sleep(waitTime);
                                 }
                                 if (gold > 0)
                                 {
                                     driver.FindElement(By.Id("gold")).Click();
                                     Console.WriteLine("Gold Selected");
                                     var amount = gold >= 49 ? 49 : gold;
-                                    Thread.Sleep(1000);
+                                    Thread.Sleep(5000);
                                     Pay(amount);
-                                    Thread.Sleep(4000);
+                                    Thread.Sleep(waitTime);
                                 }
                                 else
                                 {
@@ -404,75 +407,93 @@ namespace SmzdmBot
         }
         public void Follow()
         {
-            driver.Navigate().GoToUrl("https://zhiyou.smzdm.com/member/8468814749/friendships/followers/");
-            var script = "arguments[0].scrollIntoView(true);";
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-            var stop = false;
-            while (!stop) { 
-                var buttons = driver.FindElements(By.ClassName("focus-intro"));
-                foreach (var button in buttons)
+            try
+            {
+                driver.Navigate().GoToUrl("https://zhiyou.smzdm.com/member/8468814749/friendships/followers/");
+                var script = "arguments[0].scrollIntoView(true);";
+                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                var stop = false;
+                while (!stop)
                 {
-                    var spans = button.FindElements(By.TagName("span"));
-                    foreach (var span in spans)
+                    var buttons = driver.FindElements(By.ClassName("focus-intro"));
+                    foreach (var button in buttons)
                     {
-                        if (span.Text.Contains("关注") && !span.Text.Contains("已"))
+                        var spans = button.FindElements(By.TagName("span"));
+                        foreach (var span in spans)
                         {
-                            js.ExecuteScript(script, button);
-                            Thread.Sleep(2000);
-                            js.ExecuteScript("window.scrollBy(0,-100)");
-                            Thread.Sleep(2000);
-                            span.Click();
-                            Console.WriteLine("followed");
+                            if (span.Text.Contains("关注") && !span.Text.Contains("已"))
+                            {
+                                js.ExecuteScript(script, button);
+                                Thread.Sleep(2000);
+                                js.ExecuteScript("window.scrollBy(0,-100)");
+                                Thread.Sleep(2000);
+                                span.Click();
+                                Console.WriteLine("followed");
+                            }
                         }
                     }
-                }
-                try
-                {
-                    var turn =driver.FindElement(By.ClassName("page-turn"));
-                    if(turn.Text == "下一页")
+                    try
                     {
-                        turn.Click();
-                        continue;
+                        var turn = driver.FindElement(By.ClassName("page-turn"));
+                        if (turn.Text == "下一页")
+                        {
+                            turn.Click();
+                            continue;
+                        }
                     }
+                    catch (NoSuchElementException)
+                    { }
+                    stop = true;
                 }
-                catch (NoSuchElementException)
-                { }   
-                stop = true;
+            }
+            catch(Exception e)
+            {
+                MyLogger.LogWarnning(e.Message);
+                return;
             }
         }
         public void Like()
         {
-            driver.Navigate().GoToUrl("https://www.smzdm.com/");
-            var title = driver.FindElement(By.ClassName("subtitle"));
-            var script = "arguments[0].scrollIntoView(true);";
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-            js.ExecuteScript(script, title);
-            driver.FindElement(By.ClassName("r")).Click();
-            Thread.Sleep(3000);
-            //"feed-row-wide"
-            var toClicks = driver.FindElements(By.ClassName("z-feed-content")).ToList();
-            Console.WriteLine("Count " +toClicks.Count);
-            foreach(var element in toClicks)
+            try
             {
-                js.ExecuteScript(script, element);
-                try
+                driver.Navigate().GoToUrl("https://www.smzdm.com/");
+                var title = driver.FindElement(By.ClassName("subtitle"));
+                var script = "arguments[0].scrollIntoView(true);";
+                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                js.ExecuteScript(script, title);
+                driver.FindElement(By.ClassName("r")).Click();
+                Thread.Sleep(3000);
+                //"feed-row-wide"
+                var toClicks = driver.FindElements(By.ClassName("z-feed-content")).ToList();
+                Console.WriteLine("Count " + toClicks.Count);
+                foreach (var element in toClicks)
                 {
-                    //WebDriverWait wait = new WebDriverWait(driver, System.TimeSpan.FromSeconds(10));
-                    element.FindElement(By.ClassName("icon-zhi-o-thin")).Click();
-                    Console.WriteLine("vote clicked");
-                    Thread.Sleep(1000);
-                    //element.FindElement(By.ClassName("icon-star-o-thin")).Click();
-                    //Console.WriteLine("star clicked");
-                    //Thread.Sleep(4000);
+                    js.ExecuteScript(script, element);
+                    try
+                    {
+                        //WebDriverWait wait = new WebDriverWait(driver, System.TimeSpan.FromSeconds(10));
+                        element.FindElement(By.ClassName("icon-zhi-o-thin")).Click();
+                        Console.WriteLine("vote clicked");
+                        Thread.Sleep(1000);
+                        element.FindElement(By.ClassName("icon-star-o-thin")).Click();
+                        Console.WriteLine("star clicked");
+                        Thread.Sleep(4000);
+                    }
+                    catch (NoSuchElementException e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                    catch (ElementNotInteractableException e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
                 }
-                catch(NoSuchElementException e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-                catch(ElementNotInteractableException e)
-                {
-                    Console.WriteLine(e.Message);
-                }
+            }
+            catch(NullReferenceException e)
+            {
+                MyLogger.LogWarnning(e.Message);
+                MyLogger.LogWarnning(e.InnerException.Message);
+                
             }
         }
         private bool CheckFrequecyNotice()
@@ -508,9 +529,8 @@ namespace SmzdmBot
                 Console.WriteLine("T" + red_font.Text);
                 noticeDisplayed = true;
             }
-            catch (NoSuchElementException e)
+            catch (NoSuchElementException)
             {
-
                 noticeDisplayed = false;
             }
             return noticeDisplayed;
@@ -532,7 +552,7 @@ namespace SmzdmBot
             return false;
         }
 
-        public int ReadInfo()
+        public void ReadInfo()
         {
             var notice = driver.FindElement(By.Id("bhNotice")).Text;
             if (!String.IsNullOrWhiteSpace(notice))
@@ -546,27 +566,19 @@ namespace SmzdmBot
                     if (level != null && baoLiaoLeftStr != null)
                     {
                         Level = int.Parse(level);
-                        //baoLiaoLeft = int.Parse(baoLiaoLeft);
-                        //Console.WriteLine("Level " + level + " Bao Liao left " + baoLiaoLeft);
                         this.baoLiaoLeft = int.Parse(baoLiaoLeftStr);
-                        if (startNumber == -1)
-                        {
-                            startNumber = this.baoLiaoLeft;
-                        }
-                        return this.baoLiaoLeft;
                     }
                 }
             }
-            return -1;
         }
         //return code
         //0=warn notice=>next item
         //1=looks good=> submit
         //2=stop and quit
-        public int PasteItemUrl(string url, int index, int timeWait, int stopNumber)
+        public bool PasteItemUrl(string url, int index, int timeWait, int stopNumber)
         {
-            if (baoLiaoLeft == 0) return 2;
-            if (baoLiaoLeft != -1 && startNumber - baoLiaoLeft >= stopNumber) return 2;
+            if (baoLiaoLeft == 0) return false;
+            //if (baoLiaoLeft != -1 && startNumber - baoLiaoLeft >= stopNumber) return 2;
             Helper.ToUrl(driver, @"https://www.smzdm.com/baoliao/?old");
             Console.WriteLine("Pasting " + url);
             driver.FindElement(By.Name("item_link")).SendKeys(url); //item.jd.com/100005093980.html
@@ -576,34 +588,34 @@ namespace SmzdmBot
             {
                 if (CheckFrequecyNotice())
                 {
-                    return 0;
+                    return false;
                 }
                 Console.WriteLine("Sleep for " + timeWait + " seconds.");
                 Thread.Sleep(timeWait * 1000);
                 //var pop2 = driver.FindElement(By.Id("pop2"));
-                int left = ReadInfo();
-                if (baoLiaoLeft == 0) return 2;
-                if (left != -1 && startNumber - baoLiaoLeft >= stopNumber)
-                {
-                    Console.WriteLine("Quit loop");
-                    return 2;
-                }
+                ReadInfo();
+                if (baoLiaoLeft == 0) return false;
+                //if (left != -1 && startNumber - baoLiaoLeft >= stopNumber)
+                //{
+                //    Console.WriteLine("Quit loop");
+                //    return 2;
+                //}
                 else if (CheckWarnNotice())
                 {
                     Console.WriteLine("Notice catched");
-                    return 0;
+                    return false;
                 }
                 else if (CheckForm())
                 {
                     Console.WriteLine("looks good");
-                    return 1; // form rendered succuss
+                    return true; // form rendered succuss
                 }
                 else
                 {
                     countDown--; // keep wait
                 }
             }
-            return 0; // next item
+            return false; // next item
         }
 
         private string GetStatus()

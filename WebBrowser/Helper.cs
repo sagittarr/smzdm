@@ -3,12 +3,29 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace SmzdmBot
 {
+    public class MyLogger
+    {
+        public static void LogWarnning(String text)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine(text);
+            Console.ResetColor();
+        }
+    }
+    public class AccountConfig
+    {
+        public string telelphone = "";
+        public string email = "";
+        public string password = "";
+        public string mode = "";
+    }
     public class Option
     {
         public string username = "";
@@ -25,13 +42,16 @@ namespace SmzdmBot
         public int CrawlCount = 50;
         public string browser = "firefox";
         public string pageNumbers = "500,502,504";
-        public string HotPickCategory = "";
+        public string Topic = "";
         public string SmzdmWikiPages { get; set; }
         public double PriceRate = 1.0;
         public string Browser = "firefox";
+        public string Payee = "";
+        public string Command = "";
+        public int Freq = 10;
         public string GoldTransferTarget { get; set; }
         public string Mode { get; set; }
-        private static Dictionary<string, string>  HotPickCategoryMap = new Dictionary<string, string>();
+        //private static Dictionary<string, string>  TopicMap1 = new Dictionary<string, string>();
         public Option()
         {
 
@@ -62,7 +82,7 @@ namespace SmzdmBot
             pageNumbers = account.pages;
 
             PriceRate = account.discountRate;
-            HotPickCategory = account.category;
+            Topic = account.category;
             Mode = account.mode;
         }
         public Option(string[] args)
@@ -77,37 +97,31 @@ namespace SmzdmBot
             CustomDescriptionPrefix = args[7];
             output = args[8];
         }
-        public string ConvertHotPickCategory(string name)
-        {
-            var temp = "https://www.smzdm.com/jingxuan/xuan/";
-            if (HotPickCategoryMap.Count == 0)
-            {
-                HotPickCategoryMap.Add("3c", temp+"s0f163t0b0d0r0p");
-                HotPickCategoryMap.Add("computers", temp + "s0f163t0b0d0r0p");
-                HotPickCategoryMap.Add("ele", temp + "s0f27t0b0d0r0p");
-                HotPickCategoryMap.Add("sports", temp + "s0f191t0b0d0r0p");
-                HotPickCategoryMap.Add("beauty", temp + "s0f113t0b0d0r0p");
-                HotPickCategoryMap.Add("mother", temp + "s0f75t0b0d0r0p");
-                HotPickCategoryMap.Add("home", temp + "s0f37t0b0d0r0p");
-                HotPickCategoryMap.Add("things", temp + "s0f1515t0b0d0r0p");
-                HotPickCategoryMap.Add("cloth", temp + "s0f57t0b0d0r0p");
-                HotPickCategoryMap.Add("food", temp + "s0f95t0b0d0r0p");
-                HotPickCategoryMap.Add("suning", "https://search.smzdm.com/?c=faxian&s=苏宁数码&v=a&p=");
-                HotPickCategoryMap.Add("jingqi", "https://search.smzdm.com/?c=faxian&s=京奇宝物&v=b&p=");
-            }
-            if (HotPickCategoryMap.ContainsKey(name))
-            {
-                return HotPickCategoryMap[name];
-            }
-            else
-            {
-                Console.WriteLine("not found key '" + name + "'");
-                return null;
-            }
-        }
+
     }
     public class Helper
     {
+        public static async Task<string> OpenFile(string path, int retry=3, int timeSpan =3000)
+        {
+            var count = 0;
+            while (count < retry)
+            {
+                try
+                {
+                    using (StreamReader reader = File.OpenText(path))
+                    {
+                        return await reader.ReadToEndAsync();
+                    }
+                }
+                catch (IOException e)
+                {
+                    count++;
+                    MyLogger.LogWarnning(e.Message);
+                    await Task.Delay(timeSpan);
+                }
+            }
+            return null;
+        }
         public static bool ToUrl(IWebDriver driver, string url)
         {
             try
@@ -195,6 +209,53 @@ namespace SmzdmBot
             }
 
             driver.SwitchTo().Window(originalHandle);
+        }
+        public static string GetTopicUrl(string topic, string page)
+        {
+            topic = topic.Trim().Trim("\n".ToCharArray());
+            var temp = "https://www.smzdm.com/jingxuan/xuan/";
+            Dictionary<string, string> TopicMap1 = null;
+            Dictionary<string, string> TopicMap2 = null;
+            if (TopicMap1 == null)
+            {
+                TopicMap1 = new Dictionary<string, string>();
+                TopicMap1.Add("3c", temp + "s0f163t0b0d0r0p");
+                TopicMap1.Add("computers", temp + "s0f163t0b0d0r0p");
+                TopicMap1.Add("ele", temp + "s0f27t0b0d0r0p");
+                TopicMap1.Add("sports", temp + "s0f191t0b0d0r0p");
+                TopicMap1.Add("beauty", temp + "s0f113t0b0d0r0p");
+                TopicMap1.Add("mother", temp + "s0f75t0b0d0r0p");
+                TopicMap1.Add("home", temp + "s0f37t0b0d0r0p");
+                TopicMap1.Add("things", temp + "s0f1515t0b0d0r0p");
+                TopicMap1.Add("cloth", temp + "s0f57t0b0d0r0p");
+                TopicMap1.Add("food", temp + "s0f95t0b0d0r0p");
+                TopicMap1.Add("books", temp + "s0f7t0b0d0r0p");
+                TopicMap1.Add("gift", temp + "s0f131t0b0d0r0p");
+
+                TopicMap2 = new Dictionary<string, string>();
+                TopicMap2.Add("office", @"https://www.smzdm.com/fenlei/bangongshebei/h1c3s0f0t0p");
+                TopicMap2.Add("men_shoes", @"https://www.smzdm.com/fenlei/nanxie/h1c3s0f0t0p");
+                TopicMap2.Add("women_shoes", @"https://www.smzdm.com/fenlei/nvxie/h1c3s0f0t0p");
+                TopicMap2.Add("men_bags", @"https://www.smzdm.com/jingpinnanbao/h1c3s0f0t0p");
+                TopicMap2.Add("women_shoes", @"https://www.smzdm.com/fenlei/jingpinnvbao/h1c3s0f0t0p");
+                TopicMap2.Add("fitness_equipment", @"https://www.smzdm.com/yundongqicai/h1c3s0f0t0p");
+                TopicMap2.Add("watch", @"https://www.smzdm.com/fenlei/zhongbiao/h1c3s0f0t0p");
+                TopicMap2.Add("jewelry", @"https://www.smzdm.com/fenlei/zhubaoshoushi/h1c3s0f0t0p");
+            }
+
+            if (TopicMap1.ContainsKey(topic))
+            {
+                return TopicMap1[topic] + page + "/";
+            }
+            else if (TopicMap2.ContainsKey(topic))
+            {
+                return TopicMap1[topic] + page + "/#feed-main/";
+            }
+            else
+            {
+                MyLogger.LogWarnning(topic + "is not recognized");
+                return null;
+            }
         }
         public static string CheckUrl(string url)
         {

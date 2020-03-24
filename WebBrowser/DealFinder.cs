@@ -16,368 +16,379 @@ namespace SmzdmBot
     public class DealFinder
     {
         bool login = false;
+        int jdCount = 0;
         public IWebDriver driver;
         public DealFinder(Option option)
         {
-            if (option.Browser == "firefox")
-            {
-                driver = new FirefoxDriver();
-            }
-            else
-            {
-                driver = new ChromeDriver();
-            }
+            //if (option.Browser == "firefox")
+            //{
+            driver = new FirefoxDriver();
+            //}
+            //else
+            //{
+            //    driver = new ChromeDriver();
+            //}
             //driver = new ChromeDriver();
         }
-        public void Shutdown()
-        {
-            this.driver.Close();
-        }
-        public List<string> GetItemIdFromWikiPage(string wikiPage)
-        {
-            if (wikiPage == null) return null;
-            var itemUrls = new List<string>();
-            if (Helper.ToUrl(driver, "https://wiki.smzdm.com/" + wikiPage + "/"))
-            {
-                var emlist = driver.FindElement(By.ClassName("feed-main-list"));
-                foreach (var elm in emlist.FindElements(By.TagName("a")))
-                {
-                    if (elm.GetAttribute("href").StartsWith("https://wiki.smzdm.com/p/"))
-                    {
-                        itemUrls.Add(elm.GetAttribute("href"));
-                    }
-                }
-            }
-            return itemUrls;
-        }
-        public Dictionary<string, string> GetLinkFromWiki(string wikiUrl)
-        {
-            if (wikiUrl == null) return null;
+        //public void Shutdown()
+        //{
+        //    this.driver.Close();
+        //}
+        //public List<string> GetItemIdFromWikiPage(string wikiPage)
+        //{
+        //    if (wikiPage == null) return null;
+        //    var itemUrls = new List<string>();
+        //    if (Helper.ToUrl(driver, "https://wiki.smzdm.com/" + wikiPage + "/"))
+        //    {
+        //        var emlist = driver.FindElement(By.ClassName("feed-main-list"));
+        //        foreach (var elm in emlist.FindElements(By.TagName("a")))
+        //        {
+        //            if (elm.GetAttribute("href").StartsWith("https://wiki.smzdm.com/p/"))
+        //            {
+        //                itemUrls.Add(elm.GetAttribute("href"));
+        //            }
+        //        }
+        //    }
+        //    return itemUrls;
+        //}
+        //public Dictionary<string, string> GetLinkFromWiki(string wikiUrl)
+        //{
+        //    if (wikiUrl == null) return null;
             
-            if (Helper.ToUrl(driver, wikiUrl))
-            {
-                var linkList = new List<string>();
-                try
-                {
-                    var title = driver.FindElement(By.ClassName("pd-title")).Text; 
-                    var mainPriceText = driver.FindElement(By.ClassName("sku-pd-price")).Text;
-                    var lastSharePriceText = driver.FindElement(By.ClassName("z-highlight")).Text;
-                    var mainPrice = 0.0;
-                    var lastSharePrice = 0.0;
-                    if (title.Contains("羽绒服") || title.Contains("裙") || title.Contains("裤")) return null;
-                    //var index = mainPriceText.IndexOf("元");
-                    var index = lastSharePriceText.IndexOf("元");
-                    if (index == -1) return null;
-                    try
-                    {
-                        //mainPrice = double.Parse(mainPriceText.Substring(0, index));
-                        //Console.WriteLine("main price " + mainPrice);
-                        lastSharePrice = double.Parse(lastSharePriceText.Substring(0, index));
-                        Console.WriteLine("lastSharePrice " + lastSharePrice);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-                        return null;
-                    }
-                    var zButton = driver.FindElement(By.ClassName("feed-link-btn-inner"));
-                    var goLink = "";
-                    var link = zButton.FindElement(By.TagName("a")).GetAttribute("href");
-                    if (link.StartsWith("https://go.smzdm.com/"))
-                    {
-                        goLink = link;
-                    }
+        //    if (Helper.ToUrl(driver, wikiUrl))
+        //    {
+        //        var linkList = new List<string>();
+        //        try
+        //        {
+        //            var title = driver.FindElement(By.ClassName("pd-title")).Text; 
+        //            var mainPriceText = driver.FindElement(By.ClassName("sku-pd-price")).Text;
+        //            var lastSharePriceText = driver.FindElement(By.ClassName("z-highlight")).Text;
+        //            var mainPrice = 0.0;
+        //            var lastSharePrice = 0.0;
+        //            if (title.Contains("羽绒服") || title.Contains("裙") || title.Contains("裤")) return null;
+        //            //var index = mainPriceText.IndexOf("元");
+        //            var index = lastSharePriceText.IndexOf("元");
+        //            if (index == -1) return null;
+        //            try
+        //            {
+        //                //mainPrice = double.Parse(mainPriceText.Substring(0, index));
+        //                //Console.WriteLine("main price " + mainPrice);
+        //                lastSharePrice = double.Parse(lastSharePriceText.Substring(0, index));
+        //                Console.WriteLine("lastSharePrice " + lastSharePrice);
+        //            }
+        //            catch (Exception e)
+        //            {
+        //                Console.WriteLine(e.Message);
+        //                return null;
+        //            }
+        //            var zButton = driver.FindElement(By.ClassName("feed-link-btn-inner"));
+        //            var goLink = "";
+        //            var link = zButton.FindElement(By.TagName("a")).GetAttribute("href");
+        //            if (link.StartsWith("https://go.smzdm.com/"))
+        //            {
+        //                goLink = link;
+        //            }
 
-                    var feedFirst = driver.FindElement(By.ClassName("feed-block-title"));
-                    var itemLink = "";
-                    link = "";
-                    link = feedFirst.FindElement(By.TagName("a")).GetAttribute("href");
-                    if (link.StartsWith("https://www.smzdm.com/p/"))
-                    {
-                        itemLink = link;
-                    }
-                    //var malls = driver.FindElements(By.ClassName("mall-price")).ToList();
-                    //foreach(IWebElement element in malls)
+        //            var feedFirst = driver.FindElement(By.ClassName("feed-block-title"));
+        //            var itemLink = "";
+        //            link = "";
+        //            link = feedFirst.FindElement(By.TagName("a")).GetAttribute("href");
+        //            if (link.StartsWith("https://www.smzdm.com/p/"))
+        //            {
+        //                itemLink = link;
+        //            }
+        //            var it = new Dictionary<string, string>();
+        //            it.Add("smzdmProduct", itemLink);
+        //            it.Add("smzdmGo", goLink);
+        //            it.Add("smzdmGoodPrice", lastSharePrice.ToString());
+        //            it.Add("smzdmItemTitle", title);
+        //            Console.WriteLine(JsonConvert.SerializeObject(it));
+        //            return it;
+        //        }
+        //        catch (NoSuchElementException)
+        //        {
+        //            return null;
+        //        }
+        //    }
+        //    return null;
+        //}
+        public Dictionary<string, string> GetSmzdmItem(IWebElement item)
+        {
+            try
+            {
+                Console.WriteLine(item.Text);
+                var oldPrice = 0.0;
+                var lines = item.Text.Split('\n');
+                var itemTitle = "";
+                if (lines.Length >= 2)
+                {
+                    //if (lines[0].IndexOf("件") != -1 || lines[1].IndexOf("合") != -1)
                     //{
-                    //    var href = element.GetAttribute("href");
-                    //    if (href.StartsWith("https://go.smzdm.com/"))
-                    //    {
-                    //        linkList.Add(href);
-                    //    }
+                    //    Console.WriteLine("complicated price skip ");
+                    //    return null;
                     //}
-                    //var wiki = new SmzdmWiki();
-                    //wiki.SmzdmGoUrls.AddRange(linkList);
-                    //wiki.SmzdmGoodPrice = lastSharePrice;
-                    //wiki.SmzdmItemTitle = title;
-                    var it = new Dictionary<string, string>();
-                    it.Add("smzdmProduct", itemLink);
-                    it.Add("smzdmGo", goLink);
-                    it.Add("smzdmGoodPrice", lastSharePrice.ToString());
-                    it.Add("smzdmItemTitle", title);
-                    Console.WriteLine(JsonConvert.SerializeObject(it));
-                    return it;
+                    int idx = lines[1].IndexOf("元");
+                    if (idx != -1)
+                    {
+                        var priceStr = lines[1].Substring(0, idx);
+                        try
+                        {
+                            oldPrice = double.Parse(Helper.ParseDigits(priceStr));
+                            if (oldPrice < 10) return null;
+                        }
+                        catch (System.FormatException)
+                        {
+                            return null;
+                        }
+                        itemTitle = lines[0];
+                        Console.WriteLine("old price " + oldPrice);
+                    }
                 }
-                catch (NoSuchElementException)
+                else
                 {
                     return null;
                 }
-            }
-            return null;
-        }
-        public Dictionary<string, string> GetSmzdmItem(IWebElement item)
-        {
-            Console.WriteLine(item.Text);
-            var oldPrice = 0.0;
-            var lines = item.Text.Split('\n');
-            var itemTitle = "";
-            if (lines.Length >= 2)
-            {
-                //if (lines[0].IndexOf("件") != -1 || lines[1].IndexOf("合") != -1)
-                //{
-                //    Console.WriteLine("complicated price skip ");
-                //    return null;
-                //}
-                int idx = lines[1].IndexOf("元");
-                if (idx != -1)
+
+                var elements = item.FindElements(By.TagName("a")).ToList();
+                var goSmzdmUrl = "";
+                var itemSmzdmUrl = "";
+                foreach (IWebElement e in elements)
                 {
-                    var priceStr = lines[1].Substring(0, idx);
-                    try
+                    var href = e.GetAttribute("href");
+                    if (goSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://go.smzdm.com/"))
                     {
-                        oldPrice = double.Parse(Helper.ParseDigits(priceStr));
-                        if (oldPrice < 10) return null;
+                        goSmzdmUrl = href;
+                        Console.WriteLine(href);
                     }
-                    catch (System.FormatException)
+                    else if (itemSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://www.smzdm.com/p/") && !href.EndsWith("comment"))
                     {
-                        return null;
+                        itemSmzdmUrl = href;
+                        Console.WriteLine(href);
                     }
-                    itemTitle = lines[0];
-                    Console.WriteLine("old price " + oldPrice);
+
+                    if (goSmzdmUrl != "" && itemSmzdmUrl != "")
+                    {
+                        var it = new Dictionary<string, string>();
+                        it.Add("smzdmProduct", itemSmzdmUrl);
+                        it.Add("smzdmGo", goSmzdmUrl);
+                        it.Add("smzdmGoodPrice", oldPrice.ToString());
+                        it.Add("smzdmItemTitle", itemTitle);
+                        return it;
+                    }
                 }
             }
-            else
+            catch(WebDriverException e)
             {
+                Console.WriteLine("deal finder " + e.Message);
                 return null;
-            }
-
-            var elements = item.FindElements(By.TagName("a")).ToList();
-            var goSmzdmUrl = "";
-            var itemSmzdmUrl = "";
-            foreach (IWebElement e in elements)
-            {
-                var href = e.GetAttribute("href");
-                if (goSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://go.smzdm.com/"))
-                {
-                    goSmzdmUrl = href;
-                    Console.WriteLine(href);
-                }
-                else if (itemSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://www.smzdm.com/p/") && !href.EndsWith("comment"))
-                {
-                    itemSmzdmUrl = href;
-                    Console.WriteLine(href);
-                }
-
-                if (goSmzdmUrl != "" && itemSmzdmUrl != "")
-                {
-                    var it = new Dictionary<string, string>();
-                    it.Add("smzdmProduct", itemSmzdmUrl);
-                    it.Add("smzdmGo", goSmzdmUrl);
-                    it.Add("smzdmGoodPrice", oldPrice.ToString());
-                    it.Add("smzdmItemTitle", itemTitle);
-                    return it;
-                }
             }
             return null;
         }
         public Price CheckPrice(Dictionary<string, string> it)
         {
-            if (it == null) return null;
-            if (Helper.ToUrl(driver, it["smzdmProduct"]))
+            try
             {
-                Console.WriteLine(driver.Url);
-                try
+                if (it == null) return null;
+                if (jdCount > 10)
                 {
-                    var url = "";
-                    driver.FindElement(By.ClassName("new-baike-card"));
-                    if (Helper.ToUrl(driver, it["smzdmGo"]))
+                    this.driver.Quit();
+                    this.driver = new FirefoxDriver();
+                    jdCount = 0;
+                }
+                if (Helper.ToUrl(driver, it["smzdmProduct"]))
+                {
+                    Console.WriteLine(driver.Url);
+                    try
                     {
-                        Console.WriteLine(driver.Url);
-                        url = driver.Url;
-                        var price = new Price();
-                        if (driver.Url.StartsWith("https://product.suning.com/") || driver.Url.StartsWith("http://product.suning.com/"))
+                        var url = "";
+                        driver.FindElement(By.ClassName("new-baike-card"));
+                        if (Helper.ToUrl(driver, it["smzdmGo"]))
                         {
-                            price = SUNINGPriceParser.ExtractPrice(driver);
-                            if (price != null)
+                            Console.WriteLine(driver.Url);
+                            url = driver.Url;
+                            var price = new Price();
+                            if (driver.Url.StartsWith("https://product.suning.com/") || driver.Url.StartsWith("http://product.suning.com/"))
                             {
-                                price.Calculate();
-                                if (price.finalPrice <= 0)
+                                price = SUNINGPriceParser.ExtractPrice(driver);
+                                if (price != null)
                                 {
-                                    Console.WriteLine("Fail to process SUNING item, Skip");
-                                    return null;
-                                }
-                            }
-                        }
-                        else if(driver.Url.StartsWith("https://re.jd.com/cps/item/") || driver.Url.StartsWith("http://re.jd.com/cps/item/"))
-                        {
-                            driver.FindElement(By.ClassName("gobuy")).Click();
-                            Console.WriteLine("Wait 5s for redirect from re.jd.com");
-                            Thread.Sleep(5000);
-                            if (driver.Url.StartsWith("https://passport.jd.com/"))
-                            {
-                                var parts = driver.Url.Split("?=".ToCharArray());
-                                foreach(var p in parts)
-                                {
-                                    if (p.StartsWith("https://item.jd.com/"))
+                                    price.Calculate();
+                                    if (price.finalPrice <= 0)
                                     {
-                                        driver.Navigate().GoToUrl(p);
-                                        price = JDPriceParser.ExtractPrice(driver);
-                                        //driver.Close();
-                                        //Console.WriteLine("close page1");
-                                        break;
+                                        Console.WriteLine("Fail to process SUNING item, Skip");
+                                        return null;
                                     }
                                 }
-                                //driver.Close();
-                                
                             }
-                            
-                        }
-                        else if (driver.Url.StartsWith("https://item.jd.com/") || driver.Url.StartsWith("http://item.jd.com/"))
-                        {
-                            price = JDPriceParser.ExtractPrice(driver);
-                            //driver.Close();
-                            //Console.WriteLine("close page2");
-                        }
-                        //if(driver.Url.StartsWith("https://item.jd.com/") || driver.Url.StartsWith("http://item.jd.com/"))
-                        //{
-                        //    price = JDPriceParser.ExtractPrice();
-                        //}
-                        price.SmzdmGoodPrice = double.Parse(it["smzdmGoodPrice"]);
-                        price.sourceUrl = url;
-                        price.SmzdmItemTitle = it["smzdmItemTitle"];
-                        price.SmzdmGoUrl = it["smzdmGo"];
+                            else if (driver.Url.StartsWith("https://re.jd.com/cps/item/") || driver.Url.StartsWith("http://re.jd.com/cps/item/"))
+                            {
+                                jdCount++;
+                                driver.FindElement(By.ClassName("gobuy")).Click();
+                                Console.WriteLine("Wait 5s for redirect from re.jd.com");
+                                Thread.Sleep(5000);
+                                if (driver.Url.StartsWith("https://passport.jd.com/"))
+                                {
+                                    var parts = driver.Url.Split("?=".ToCharArray());
+                                    foreach (var p in parts)
+                                    {
+                                        if (p.StartsWith("https://item.jd.com/"))
+                                        {
+                                            driver.Navigate().GoToUrl(p);
+                                            price = JDPriceParser.ExtractPrice(driver);
 
-                        Console.WriteLine("added " + price.sourceUrl + " " + price.SmzdmGoodPrice);
-                        
-                        return price;
+                                            break;
+                                        }
+                                    }
+                                    //driver.Close();
+
+                                }
+
+                            }
+                            else if (driver.Url.StartsWith("https://item.jd.com/") || driver.Url.StartsWith("http://item.jd.com/"))
+                            {
+                                jdCount++;
+                                price = JDPriceParser.ExtractPrice(driver);
+                                //driver.Close();
+                                //Console.WriteLine("close page2");
+                            }
+                            //if(driver.Url.StartsWith("https://item.jd.com/") || driver.Url.StartsWith("http://item.jd.com/"))
+                            //{
+                            //    price = JDPriceParser.ExtractPrice();
+                            //}
+                            price.SmzdmGoodPrice = double.Parse(it["smzdmGoodPrice"]);
+                            price.sourceUrl = url;
+                            price.SmzdmItemTitle = it["smzdmItemTitle"];
+                            price.SmzdmGoUrl = it["smzdmGo"];
+
+                            Console.WriteLine("Verfied " + price.sourceUrl + " " + price.SmzdmGoodPrice);
+
+                            return price;
+                        }
+
                     }
-
+                    catch (NoSuchElementException e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
                 }
-                catch (NoSuchElementException e)
-                {
-                    Console.WriteLine(e.Message);
-                }
+            }
+            catch(WebDriverException e)
+            {
+                Console.WriteLine("deal finder " + e.Message);
+                return null;
             }
             return null;
         }
 
-        public List<Price> GetSmzdmItems(Option option)
-        {
-            var deals = new List<Price>();
-            var pages = new List<string>();
-            foreach (var pn in option.pageNumbers.Split(','))
-            {
-                pages.Add("https://www.smzdm.com/jingxuan/p" + pn + "/");
-            }
-            foreach (var page in pages)
-            {
-                driver.Navigate().GoToUrl(page);
+        //public List<Price> GetSmzdmItems(Option option)
+        //{
+        //    var deals = new List<Price>();
+        //    var pages = new List<string>();
+        //    foreach (var pn in option.pageNumbers.Split(','))
+        //    {
+        //        pages.Add("https://www.smzdm.com/jingxuan/p" + pn + "/");
+        //    }
+        //    foreach (var page in pages)
+        //    {
+        //        driver.Navigate().GoToUrl(page);
 
-                var items = driver.FindElements(By.ClassName("z-feed-content")).ToList();
-                Console.WriteLine(items.Count);
-                var SmzdmList = new List<Dictionary<string, string>>();
+        //        var items = driver.FindElements(By.ClassName("z-feed-content")).ToList();
+        //        Console.WriteLine(items.Count);
+        //        var SmzdmList = new List<Dictionary<string, string>>();
 
-                foreach (IWebElement item in items)
-                {
-                    Console.WriteLine(item.Text);
-                    var oldPrice = 0.0;
-                    var lines = item.Text.Split('\n');
-                    var itemTitle = "";
-                    if (lines.Length >= 2)
-                    {
-                        if (lines[0].IndexOf("件") != -1 || lines[1].IndexOf("合") != -1)
-                        {
-                            Console.WriteLine("complicated price skip ");
-                            continue;
-                        }
-                        int idx = lines[1].IndexOf("元");
-                        if (idx != -1)
-                        {
-                            var priceStr = lines[1].Substring(0, idx);
-                            try
-                            {
-                                oldPrice = double.Parse(Helper.ParseDigits(priceStr));
-                                if (oldPrice < 10) continue;
-                            }
-                            catch (System.FormatException)
-                            {
-                                continue;
-                            }
-                            itemTitle = lines[0];
-                            Console.WriteLine("old price " + oldPrice);
-                        }
-                    }
-                    else
-                    {
-                        continue;
-                    }
+        //        foreach (IWebElement item in items)
+        //        {
+        //            Console.WriteLine(item.Text);
+        //            var oldPrice = 0.0;
+        //            var lines = item.Text.Split('\n');
+        //            var itemTitle = "";
+        //            if (lines.Length >= 2)
+        //            {
+        //                if (lines[0].IndexOf("件") != -1 || lines[1].IndexOf("合") != -1)
+        //                {
+        //                    Console.WriteLine("complicated price skip ");
+        //                    continue;
+        //                }
+        //                int idx = lines[1].IndexOf("元");
+        //                if (idx != -1)
+        //                {
+        //                    var priceStr = lines[1].Substring(0, idx);
+        //                    try
+        //                    {
+        //                        oldPrice = double.Parse(Helper.ParseDigits(priceStr));
+        //                        if (oldPrice < 10) continue;
+        //                    }
+        //                    catch (System.FormatException)
+        //                    {
+        //                        continue;
+        //                    }
+        //                    itemTitle = lines[0];
+        //                    Console.WriteLine("old price " + oldPrice);
+        //                }
+        //            }
+        //            else
+        //            {
+        //                continue;
+        //            }
                     
-                    var elements = item.FindElements(By.TagName("a")).ToList();
-                    var goSmzdmUrl = "";
-                    var itemSmzdmUrl = "";
-                    foreach (IWebElement e in elements)
-                    {
-                        var href = e.GetAttribute("href");
-                        if (goSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://go.smzdm.com/"))
-                        {
-                            goSmzdmUrl = href;
-                            Console.WriteLine(href);
-                        }
-                        else if (itemSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://www.smzdm.com/p/") && !href.EndsWith("comment"))
-                        {
-                            itemSmzdmUrl = href;
-                            Console.WriteLine(href);
-                        }
+        //            var elements = item.FindElements(By.TagName("a")).ToList();
+        //            var goSmzdmUrl = "";
+        //            var itemSmzdmUrl = "";
+        //            foreach (IWebElement e in elements)
+        //            {
+        //                var href = e.GetAttribute("href");
+        //                if (goSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://go.smzdm.com/"))
+        //                {
+        //                    goSmzdmUrl = href;
+        //                    Console.WriteLine(href);
+        //                }
+        //                else if (itemSmzdmUrl == "" && !string.IsNullOrWhiteSpace(href) && href.StartsWith("https://www.smzdm.com/p/") && !href.EndsWith("comment"))
+        //                {
+        //                    itemSmzdmUrl = href;
+        //                    Console.WriteLine(href);
+        //                }
 
-                        if (goSmzdmUrl != "" && itemSmzdmUrl != "")
-                        {
-                            var it = new Dictionary<string, string>();
-                            it.Add("smzdmProduct", itemSmzdmUrl);
-                            it.Add("smzdmGo", goSmzdmUrl);
-                            it.Add("smzdmGoodPrice", oldPrice.ToString());
-                            it.Add("smzdmItemTitle", itemTitle);
-                            SmzdmList.Add(it);
-                            break;
-                        }
-                    }
+        //                if (goSmzdmUrl != "" && itemSmzdmUrl != "")
+        //                {
+        //                    var it = new Dictionary<string, string>();
+        //                    it.Add("smzdmProduct", itemSmzdmUrl);
+        //                    it.Add("smzdmGo", goSmzdmUrl);
+        //                    it.Add("smzdmGoodPrice", oldPrice.ToString());
+        //                    it.Add("smzdmItemTitle", itemTitle);
+        //                    SmzdmList.Add(it);
+        //                    break;
+        //                }
+        //            }
 
-                }
+        //        }
 
-                foreach (var it in SmzdmList)
-                {
-                    if (Helper.ToUrl(driver,it["smzdmProduct"]))
-                    {
-                        try
-                        {
-                            driver.FindElement(By.ClassName("new-baike-card"));
-                            if (Helper.ToUrl(driver, it["smzdmGo"]))
-                            {
-                                var p = new Price();
-                                p.SmzdmGoodPrice = double.Parse(it["smzdmGoodPrice"]);
-                                p.sourceUrl = driver.Url;
-                                p.SmzdmItemTitle = it["smzdmItemTitle"];
-                                p.SmzdmGoUrl = it["smzdmGo"];
-                                deals.Add(p);
-                                Console.WriteLine("added " + p.sourceUrl + " " + p.SmzdmGoodPrice);
-                            }
-                        }
-                        catch (NoSuchElementException e)
-                        {
-                            Console.WriteLine("No Baike, drop " + it["smzdmProduct"]);
-                        }
-                    }
-                }
-            }
-            return deals;
-        }
+        //        foreach (var it in SmzdmList)
+        //        {
+        //            if (Helper.ToUrl(driver,it["smzdmProduct"]))
+        //            {
+        //                try
+        //                {
+        //                    driver.FindElement(By.ClassName("new-baike-card"));
+        //                    if (Helper.ToUrl(driver, it["smzdmGo"]))
+        //                    {
+        //                        var p = new Price();
+        //                        p.SmzdmGoodPrice = double.Parse(it["smzdmGoodPrice"]);
+        //                        p.sourceUrl = driver.Url;
+        //                        p.SmzdmItemTitle = it["smzdmItemTitle"];
+        //                        p.SmzdmGoUrl = it["smzdmGo"];
+        //                        deals.Add(p);
+        //                        Console.WriteLine("added " + p.sourceUrl + " " + p.SmzdmGoodPrice);
+        //                    }
+        //                }
+        //                catch (NoSuchElementException e)
+        //                {
+        //                    Console.WriteLine("No Baike, drop " + it["smzdmProduct"]);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return deals;
+        //}
 
 
         public Price ParsePrice(string text, string source)
