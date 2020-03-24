@@ -124,13 +124,14 @@ namespace SmzdmBot
                 //Console.WriteLine(opt.Payee);
                 TransferGold(publisher, taskPath, opt);
             }
-            catch (AggregateException e)
+            catch (System.NullReferenceException e)
             {
                 MyLogger.LogWarnning(e.Message);
                 MyLogger.LogWarnning(e.InnerException.Message);
             }
-            catch (Exception e)
+            catch (AggregateException e)
             {
+                MyLogger.LogWarnning(e.Message);
                 MyLogger.LogWarnning(e.InnerException.Message);
             }
         }
@@ -153,20 +154,11 @@ namespace SmzdmBot
                     content = ProcessTask(content, opt, out Tuple<string, int> task);
                     await WriteFileAsync(taskPath, content);
                     Console.WriteLine("Write done.");
-                    opt.HotPickCategory = task.Item1;
-                    Console.WriteLine(opt.HotPickCategory);
+                    opt.Topic = task.Item1;
+                    Console.WriteLine(opt.Topic);
                     Console.Title = opt.username + " " + task.Item1 + task.Item2 + " " + publisher.baoLiaoLeft;
-                    var urlroot = opt.ConvertHotPickCategory(opt.HotPickCategory);
-                    if (urlroot == null) return;
-                    string pageUrl = "";
-                    if (opt.HotPickCategory == "office")
-                    {
-                        pageUrl = urlroot + task.Item2.ToString() + "/#feed-main/";
-                    }
-                    else
-                    {
-                        pageUrl = urlroot + task.Item2.ToString() + "/";
-                    }
+                    var pageUrl = Helper.GetTopicUrl(opt.Topic, task.Item2.ToString());
+                    if (pageUrl == null) return;
                     var exceptionCount = 0;
                     while (exceptionCount < 5)
                     {
@@ -324,7 +316,7 @@ namespace SmzdmBot
                 }
             }
 
-            Console.WriteLine(option.HotPickCategory + " " + pageUrl + " Task Finished");
+            Console.WriteLine(option.Topic + " " + pageUrl + " Task Finished");
             Console.WriteLine("baoliao left " + publisher.baoLiaoLeft);
         }
     }

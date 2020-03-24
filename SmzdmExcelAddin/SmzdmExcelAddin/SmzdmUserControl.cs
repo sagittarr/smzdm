@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Windows.Forms;
-using Microsoft.Office.Interop.Excel;
-using SmzdmBot;
+﻿using Microsoft.Office.Interop.Excel;
 using Newtonsoft.Json;
+using SmzdmBot;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace SmzdmExcelAddin
 {
@@ -22,14 +21,6 @@ namespace SmzdmExcelAddin
         public SmzdmUserControl()
         {
             InitializeComponent();
-            try
-            {
-                LoadSetting();
-            }
-            catch(Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
         }
         private List<Account> LoadAccounts()
         {
@@ -57,7 +48,7 @@ namespace SmzdmExcelAddin
                         pages = lists[i][Account.ColumnIndexMapper["pages"]],
                         category = lists[i][Account.ColumnIndexMapper["category"]],
                         login = lists[i][Account.ColumnIndexMapper["login"]],
-                        StatusFilePath = textBox3.Text,
+                        //StatusFilePath = textBox3.Text,
                         discountRate = Double.Parse(lists[i][Account.ColumnIndexMapper["discount rate"]]),
                         RowIndex = i
                     };
@@ -88,14 +79,14 @@ namespace SmzdmExcelAddin
         {
             try
             {
+
+                LoadSetting();
                 var accounts = LoadAccounts();
                 foreach(var account in accounts)
                 {
                     if(account.login.ToLower() == "y")
                     {
-                        //var selectedOption = MessageBox.Show(JsonConvert.SerializeObject(account) + "  Please confirm.", "Ready to run?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-                        //if (selectedOption == DialogResult.Yes)
-                        //{
+
                             File.WriteAllText(ArgsPath, JsonConvert.SerializeObject(account));
                             try
                             {
@@ -106,14 +97,13 @@ namespace SmzdmExcelAddin
                             {
                                 MessageBox.Show(es.Message);
                             }
-                        //}
                     }
                 }
 
             }
-            catch (System.Runtime.InteropServices.COMException)
+            catch(Exception ex)
             {
-                MessageBox.Show("无权限");
+                MessageBox.Show(ex.Message);
             }
         }
 
@@ -135,10 +125,10 @@ namespace SmzdmExcelAddin
             {
                 MessageBox.Show(path + " not exsits.");
             }
-            var current = LoadAccounts();
+            var sheet = LoadAccounts();
             Worksheet ws = Globals.ThisAddIn.Application.ActiveWorkbook.ActiveSheet;
             //ws.Cells[8, 2].Value = "Salary";
-            foreach (var item in current)
+            foreach (var item in sheet)
             {
                 foreach(var newOne in newOnes)
                 {
@@ -157,6 +147,35 @@ namespace SmzdmExcelAddin
                 
             }
             File.Delete(path);
+        }
+
+        private void refreshButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Worksheet ws = Globals.ThisAddIn.Application.ActiveWorkbook.ActiveSheet;
+
+                var columnCount = ws.UsedRange.Columns.Count;
+                var rowCount = ws.UsedRange.Rows.Count;
+                var lists = DataTableExt.RangeToLists(ws.UsedRange, columnCount);
+                Account.ColumnIndexMapper = new Dictionary<string, int>();
+                for (int i = 0; i < lists[0].Count; i++)
+                {
+                    Account.ColumnIndexMapper.Add(lists[0][i], i);
+                }
+                for (var i = 1; i < lists.Count; i++)
+                {
+                    var login = lists[i][Account.ColumnIndexMapper["login"]];
+                    if (login.ToLower() == "y")
+                    {
+                        ws.Cells[i+1, Account.ColumnIndexMapper["login"]+1].Value = "r";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }
