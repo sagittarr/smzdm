@@ -561,13 +561,23 @@ namespace SmzdmBot
                 var ns = notice.Split('，');
                 if (ns.Length == 2)
                 {
-                    var level = new string(ns[0].Where(c => Char.IsDigit(c)).ToArray());
-                    var baoLiaoLeftStr = new string(ns[1].Where(c => Char.IsDigit(c)).ToArray());
-                    if (level != null && baoLiaoLeftStr != null)
+                    try
                     {
-                        Level = int.Parse(level);
-                        this.baoLiaoLeft = int.Parse(baoLiaoLeftStr);
+                        var number = new string(ns[0].Where(c => Char.IsDigit(c)).ToArray());
+                        this.baoLiaoLeft = int.Parse(number);
+                        Level = -1;
                     }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine("parse baoliao number failed");
+                        Console.WriteLine(e);
+                    }
+                    //var baoLiaoLeftStr = new string(ns[1].Where(c => Char.IsDigit(c)).ToArray());
+                    //if (level != null && baoLiaoLeftStr != null)
+                    //{
+                    //    Level = int.Parse(level);
+                    //    this.baoLiaoLeft = int.Parse(baoLiaoLeftStr);
+                    //}
                 }
             }
         }

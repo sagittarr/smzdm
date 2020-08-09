@@ -236,9 +236,9 @@ namespace SmzdmBot
                 TopicMap2.Add("office", @"https://www.smzdm.com/fenlei/bangongshebei/h1c3s0f0t0p");
                 TopicMap2.Add("men_shoes", @"https://www.smzdm.com/fenlei/nanxie/h1c3s0f0t0p");
                 TopicMap2.Add("women_shoes", @"https://www.smzdm.com/fenlei/nvxie/h1c3s0f0t0p");
-                TopicMap2.Add("men_bags", @"https://www.smzdm.com/jingpinnanbao/h1c3s0f0t0p");
-                TopicMap2.Add("women_shoes", @"https://www.smzdm.com/fenlei/jingpinnvbao/h1c3s0f0t0p");
-                TopicMap2.Add("fitness_equipment", @"https://www.smzdm.com/yundongqicai/h1c3s0f0t0p");
+                TopicMap2.Add("men_bags", @"https://www.smzdm.com/fenlei/jingpinnanbao/h1c3s0f0t0p");
+                TopicMap2.Add("women_bags", @"https://www.smzdm.com/fenlei/jingpinnvbao/h1c3s0f0t0p");
+                TopicMap2.Add("fitness_equipment", @"https://www.smzdm.com/fenlei/yundongqicai/h1c3s0f0t0p");
                 TopicMap2.Add("watch", @"https://www.smzdm.com/fenlei/zhongbiao/h1c3s0f0t0p");
                 TopicMap2.Add("jewelry", @"https://www.smzdm.com/fenlei/zhubaoshoushi/h1c3s0f0t0p");
             }
@@ -249,7 +249,7 @@ namespace SmzdmBot
             }
             else if (TopicMap2.ContainsKey(topic))
             {
-                return TopicMap1[topic] + page + "/#feed-main/";
+                return TopicMap2[topic] + page + "/#feed-main/";
             }
             else
             {
