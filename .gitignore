@@ -19,3 +19,5 @@
 .vs/SmzdmBot/v15/.suo
 SmzdmExcelAddin/.vs/SmzdmExcelAddin/v15/.suo
 SmzdmExcelAddin/.vs/SmzdmExcelAddin/v15/Server/sqlite3/db.lock
+WebBrowser/smzdm.xlsx
+*.xlsx

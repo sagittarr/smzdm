@@ -33,7 +33,7 @@
     <PublishUrl>C:\Users\jiatwang\Documents\publish\smzdmAddin\</PublishUrl>
     <InstallUrl>\\MININT-VVVOEGS\Users\jiatwang\Documents\publish\smzdmAddin\</InstallUrl>
     <TargetCulture>en</TargetCulture>
-    <ApplicationVersion>1.0.0.4</ApplicationVersion>
+    <ApplicationVersion>1.0.0.5</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
